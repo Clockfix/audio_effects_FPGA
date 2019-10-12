@@ -16,20 +16,17 @@
 //top module
 `include "top.v"
 
-module top_vga_mem_tb#( parameter
-    WAIT = 1,
-    WAIT_WIDTH = 2,
-    SPEED = 2,
-     //memory parameters
-    ADDR_WIDTH = 17, //19, // 
-    DATA_WIDTH = 12, 
-    DEPTH =  307_200//76_800, // 
-)();
+module top_tb();
 
 reg clk = 1'b0;
 
 // 50% duty cycle clock
 always #0.5 clk <= ~clk;
+
+top UUT(
+    .clk(clk)
+);
+
 
 
 initial begin

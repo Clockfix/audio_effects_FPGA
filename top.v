@@ -3,31 +3,29 @@
 //      
 // `include "clock_divider_param.v"
 // `include "clock_enable_param.v"
+// `include "debounce_switch.v"
 
 
 module top #( parameter
-    //pattern generator paremater
-    SPEED = 300,
     //enable signal parameters
     WAIT = 1,
-    WAIT_WIDTH = 2,
+    WAIT_WIDTH = 2
 )(
     input           clk   
     );
 
 //------internal wires and registers--------
-wire w_enable;
-
+// wire w_enable;
 wire clk50;    
 
 //-----sub modules--------------------------
-clock_enable_param #(
-    .WAIT(WAIT),
-    .WIDTH(WAIT_WIDTH)
-  ) clock_enable1 (
-    .clk(clk),
-    .enable(w_enable)
-);
+// clock_enable_param #(
+//     .WAIT(WAIT),
+//     .WIDTH(WAIT_WIDTH)
+//   ) clock_enable1 (
+//     .clk(clk),
+//     .enable(w_enable)
+// );
 
 clock_divider #(
     .DIVIDER(1),
@@ -37,10 +35,10 @@ clock_divider #(
     .clk_out(clk50)
 );
 
-debounce_switch debounce_switch_reset(
-    .clk(clk),
-    .i_switch(),
-    .o_switch()
-);
+// debounce_switch debounce_switch_reset(
+//     .clk(clk),
+//     .i_switch(),
+//     .o_switch()
+// );
 
 endmodule
