@@ -1,15 +1,6 @@
 //      TOP module 
 //       
-// Fs = audio sample frequency
-// I2S bitrate = (#bits/channel) x (#channels) x Fs
-//         Ex: 24-bit stereo (2 channels)
-//         I2S bitrate = 24 x 2 x Fs
-//
-// I2SxCLK source = PLLI2S output or ext. input (I2S_CKIN)
-// Fs = 48kHz, 96kHz or 192kHz
-// Fs = I2SxCLK / [(CF*2) * (2*I2SDIV+ODD)*8)]
-//         CF = channel frame (24 bits)
-//      
+
 
 
 module top #( parameter
@@ -55,7 +46,7 @@ i2s_transceiver  #(
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
 ) i2s_transceiver (
-    .reset_n(~reset_n),     //asynchronous active low reset
+    .reset_n(reset_n),         //asynchronous active high reset
     .mclk(master_clk),      //master clock
     .sclk(serial_clk),      //serial clock (or bit clock)
     .ws(word_select),       //word select (or left-right clock)
@@ -80,7 +71,7 @@ effect_controler #(
 
 //debounce reset button
 debounce_switch debounce_switch_reset(
-    .clk(clk),
+    .clk(master_clk),
     .i_switch(btnC),
     .o_switch(reset_n)
 );

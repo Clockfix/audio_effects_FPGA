@@ -33,23 +33,23 @@ module i2s_transceiver #( parameter
     output ws,                                  //word select (or left-right clock)
     output sd_tx,                               //serial data transmit
     input  sd_rx,                               //serial data receive
-    input  [d_width-1: 0] l_data_tx,            //left channel data to transmit
-    input  [d_width-1: 0] r_data_tx,            //right channel data to transmit
-    output [d_width-1: 0] l_data_rx,            //left channel data received
-    output [d_width-1: 0] r_data_rx             //right channel data received   
+    input signed [d_width-1: 0] l_data_tx,            //left channel data to transmit
+    input signed [d_width-1: 0] r_data_tx,            //right channel data to transmit
+    output signed [d_width-1: 0] l_data_rx,            //left channel data received
+    output signed [d_width-1: 0] r_data_rx             //right channel data received   
     
     );
 
 reg sclk_int = 0;                       //internal serial clock wire
 reg ws_int = 0;                         //internal word select wire
-reg [d_width-1: 0] l_data_rx_int = 0;   //internal left channel rx data buffer
-reg [d_width-1: 0] r_data_rx_int = 0;   //internal right channel rx data buffer
-reg [d_width-1: 0] l_data_tx_int = 0;   //internal left channel tx data buffer
-reg [d_width-1: 0] r_data_tx_int = 0;   //internal right channel tx data buffer
+reg signed [d_width-1: 0] l_data_rx_int = 0;   //internal left channel rx data buffer
+reg signed [d_width-1: 0] r_data_rx_int = 0;   //internal right channel rx data buffer
+reg signed [d_width-1: 0] l_data_tx_int = 0;   //internal left channel tx data buffer
+reg signed [d_width-1: 0] r_data_tx_int = 0;   //internal right channel tx data buffer
 
 reg r_sd_tx = 0;                        //internal register 
-reg [d_width-1: 0] reg_r_data_rx = 0;
-reg [d_width-1: 0] reg_l_data_rx = 0; 
+reg signed [d_width-1: 0] reg_r_data_rx = 0;
+reg signed [d_width-1: 0] reg_l_data_rx = 0; 
 
 
 reg [2: 0] sclk_cnt = 0;  //counter of master clocks during half period of serial clock
@@ -57,9 +57,9 @@ reg [7: 0] ws_cnt   = 0;  //counter of serial clock toggles during half period o
 
 
 
-always@(mclk , reset_n) begin
+always@(posedge mclk, posedge reset_n) begin
 
-    if (reset_n == 0) begin
+    if (reset_n == 1) begin
         sclk_cnt <= 'b0;                  //clear mclk/sclk counter
         ws_cnt <= 'b0;                    //clear sclk/ws counter
         sclk_int <= 0;                  //clear serial clock signal
@@ -72,7 +72,7 @@ always@(mclk , reset_n) begin
         reg_l_data_rx <= 'b0;           //clear left channel received data output
         reg_r_data_rx <= 'b0;           //clear right channel received data output
     end
-    else if (mclk == 1) begin           //master clock rising edge
+    else begin                          //master clock rising edge
         if (sclk_cnt < mclk_sclk_ratio/2-1) begin   //less than half period of sclk
             sclk_cnt <= sclk_cnt + 1;               //increment mclk/sclk counter
         end
@@ -101,8 +101,8 @@ always@(mclk , reset_n) begin
             end else begin                          //half period of ws
                 ws_cnt <= 0;                        //reset sclk/ws counter
                 ws_int <= ~ws_int;                  //toggle word select
-                reg_r_data_rx <= r_data_rx_int;     //output right channel received data
-                reg_l_data_rx <= l_data_rx_int;     //output left channel received data
+//               reg_r_data_rx <= r_data_rx_int;     //output right channel received data
+//               reg_l_data_rx <= l_data_rx_int;     //output left channel received data
                 r_data_tx_int <= r_data_tx;         //latch in right channel data to transmit
                 l_data_tx_int <= l_data_tx;         //latch in left channel data to transmit
             end
@@ -113,7 +113,9 @@ end
 assign sclk = sclk_int;             //output serial clock
 assign ws = ws_int;                 //output word select
 assign sd_tx = r_sd_tx;             //assign sd_tx
-assign r_data_rx = reg_r_data_rx;
-assign l_data_rx = reg_l_data_rx;
+//assign r_data_rx = reg_r_data_rx;
+//assign l_data_rx = reg_l_data_rx;
+assign r_data_rx = ~(ws_cnt < sclk_ws_ratio - 1)? r_data_rx_int: r_data_rx ;
+assign l_data_rx = ~(ws_cnt < sclk_ws_ratio - 1)? l_data_rx_int: l_data_rx ;
 
 endmodule

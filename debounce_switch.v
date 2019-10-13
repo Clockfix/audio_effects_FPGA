@@ -4,7 +4,8 @@ module debounce_switch(
     output o_switch);
 
 //    parameter c_debounce_limit=250000;// 2.5ms at 25MHz
-        parameter c_debounce_limit=1_000_000;// 10ms at 25MHz
+//        parameter c_debounce_limit=1_000_000;// 10ms at 100MHz
+        parameter c_debounce_limit=100_000; // 10ms at 10MHz
 
 reg r_state=1'b0;
 reg [19:0] r_count = 0;

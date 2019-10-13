@@ -12,7 +12,7 @@
 `include "i2s_transceiver.v"
 
 module i2s_transceiver_tb#( parameter
-    sclk_ws_ratio = 64,         // number of sclk periods per word select period
+    sclk_ws_ratio = 48,         // number of sclk periods per word select period
     mclk_sclk_ratio = 4,        // number of mclk periods per sclk period
     d_width = 24                // data width
 )();
@@ -32,7 +32,13 @@ wire [d_width-1: 0] r_data_rx;
 // 50% duty cycle clock
 always #0.5 clk <= ~clk;
 
-i2s_transceiver UUT(
+always #4 sd_rx <= ~sd_rx;
+
+i2s_transceiver #(
+    .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
+    .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
+    .d_width(d_width)                       //data width
+) UUT(
     .reset_n(reset_n),                             //asynchronous active low reset
     .mclk(clk),                                //master clock
     .sclk(sclk),                                //serial clock (or bit clock)
@@ -47,13 +53,13 @@ i2s_transceiver UUT(
 
 
 initial begin
-    #200 
-       reset_n <= 1; 
-    #200
-        l_data_tx = 'h2563;
-        r_data_tx = 'h1523;
-    #20 
-       sd_rx = 'h1;
+    #0 
+       reset_n <= 0; 
+//    #200
+        l_data_tx = 'hbbbbbb;
+        r_data_tx = 'haaaaaa;
+//    #20 
+//       sd_rx = 'h1;
 end
 
 
