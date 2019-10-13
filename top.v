@@ -36,6 +36,8 @@ wire word_select;
 wire reset_n;
 wire [d_width-1: 0] r_data_tx;
 wire [d_width-1: 0] l_data_tx;
+wire [d_width-1: 0] r_data_rx;
+wire [d_width-1: 0] l_data_rx;
 
 wire w_sd_tx;               //internal wire
 
@@ -57,12 +59,23 @@ i2s_transceiver  #(
     .mclk(master_clk),      //master clock
     .sclk(serial_clk),      //serial clock (or bit clock)
     .ws(word_select),       //word select (or left-right clock)
-    .sd_rx(ad_sdout),        //serial data transmit
-    .sd_tx(w_sd_tx),       //serial data receive
+    .sd_rx(ad_sdout),       //serial data transmit
+    .sd_tx(w_sd_tx),        //serial data receive
     .l_data_tx(l_data_tx),  //left channel data to transmit
     .r_data_tx(r_data_tx),  //right channel data to transmit
-    .l_data_rx(l_data_tx),  //left channel data received
-    .r_data_rx(r_data_tx)   //right channel data received
+    .l_data_rx(l_data_rx),  //left channel data received
+    .r_data_rx(r_data_rx)   //right channel data received
+);
+
+//passing data to effect controler
+effect_controler #(
+    .d_width(d_width)                       //data width
+) effect_conroler (
+//  .clk(clk),
+    .i_l_data(l_data_rx),               //left channel data received         
+    .i_r_data(r_data_rx),               //right channel data received
+    .o_l_data(l_data_tx),               //left channel data to transmit
+    .o_r_data(r_data_tx)                //right channel data to transmit
 );
 
 //debounce reset button
