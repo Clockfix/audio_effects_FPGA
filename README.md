@@ -8,4 +8,4 @@ Audio hardware
 
 
 Top module
-![Top module](https://sqtelw.bl.files.1drv.com/y4mlXUriQGOxMGSBp6BmJnRkzW-bHo_G6xQlGBU3ApJFoufn-A9Og4J6JGYTog7TlxL6ZbedzLgP9hDjVF13TKhyuxEm-naD8dsrNjLRAn25YDa2BcQOAjHDRWS-00907IVI5ieVeTlFzPVoMkXb-xzjnfGCfC39y8fCIhgy7ZA0O1U8rkYj9LuDm_M5Ax7zs6MJj9c1gnFHGCdvNerxTifug/top-audio-effects.png)
+![Top module_sh](https://sqtelw.bl.files.1drv.com/y4mlXUriQGOxMGSBp6BmJnRkzW-bHo_G6xQlGBU3ApJFoufn-A9Og4J6JGYTog7TlxL6ZbedzLgP9hDjVF13TKhyuxEm-naD8dsrNjLRAn25YDa2BcQOAjHDRWS-00907IVI5ieVeTlFzPVoMkXb-xzjnfGCfC39y8fCIhgy7ZA0O1U8rkYj9LuDm_M5Ax7zs6MJj9c1gnFHGCdvNerxTifug/top-audio-effects.png)
