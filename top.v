@@ -70,7 +70,7 @@ i2s_transceiver  #(
 //passing data to effect controler
 effect_controler #(
     .d_width(d_width)                       //data width
-) effect_conroler (
+) effect_controler (
 //  .clk(clk),
     .i_l_data(l_data_rx),               //left channel data received         
     .i_r_data(r_data_rx),               //right channel data received
