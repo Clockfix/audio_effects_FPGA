@@ -1,3 +1,11 @@
 # Audio effects on FPGA
 
 Audio effect synthesizer on FPGA
+
+Audio hardware
+
+![PMOD_I2S2](https://euborw.bl.files.1drv.com/y4mwscr7u3Q0WJKuOjfrLSFswmMhJFcQz_qvUDQmWPsWANUPPx3s-RrdHahplWN4MPxWtFJAZCzZokzS9oG3hJRHTa8-hztUF-5ix6DoEZ3FbW79HuWuWykaC6-vPQCz_jN-qtZzENmEM_CL7x6Fu-V3fVBwSbUUZ1B4FpyTJbHc2y09jmmIoznP9JKdHkloQC22fRvzkGEwn-uEL7m5GIYtg/pmod_i2s2.jpg) ![PMOD_I2S2_package](https://jhuenw.bl.files.1drv.com/y4mh-JRwzfInJGsB7npvB02QFP4E8O0fYseJrh7mCKZPhDtrRKAkyIU4vrSgIPZ57SPrRugP-CoS5pu-_W9fq1E2gV9SOYeyPc2In_a5uqQzCtwXbUYRvOQnHEt-zomphOLXn2Uw7RpaKbKLNvgQfF-pJNqbiX5LAaW5zODYNF66IESQ3uHqDSOCEtjt620oITZFzO71EyDkpSPB3bvZ61J6Q/pmod_i2s2_package.png)
+
+
+Top module
+![Top module](https://sqtelw.bl.files.1drv.com/y4mlXUriQGOxMGSBp6BmJnRkzW-bHo_G6xQlGBU3ApJFoufn-A9Og4J6JGYTog7TlxL6ZbedzLgP9hDjVF13TKhyuxEm-naD8dsrNjLRAn25YDa2BcQOAjHDRWS-00907IVI5ieVeTlFzPVoMkXb-xzjnfGCfC39y8fCIhgy7ZA0O1U8rkYj9LuDm_M5Ax7zs6MJj9c1gnFHGCdvNerxTifug/top-audio-effects.png)
