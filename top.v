@@ -55,7 +55,7 @@ i2s_transceiver  #(
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
 ) i2s_transceiver (
-    .reset_n(reset_n),      //asynchronous active low reset
+    .reset_n(~reset_n),     //asynchronous active low reset
     .mclk(master_clk),      //master clock
     .sclk(serial_clk),      //serial clock (or bit clock)
     .ws(word_select),       //word select (or left-right clock)

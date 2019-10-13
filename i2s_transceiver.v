@@ -16,6 +16,10 @@
 // Table 1, Section 4.1 of the CS4344 Datasheet confirms this 
 // selection, listing 11.29 MHz as a common frequency 
 // for the master clock when the LRCK is 44.1 kHz.
+//
+//  Module is created from sample provided by 
+//  Digilent
+//
 
 
 module i2s_transceiver #( parameter
@@ -46,19 +50,18 @@ reg [d_width-1: 0] r_data_tx_int = 0;   //internal right channel tx data buffer
 reg r_sd_tx = 0;                        //internal register 
 reg [d_width-1: 0] reg_r_data_rx = 0;
 reg [d_width-1: 0] reg_l_data_rx = 0; 
-reg [d_width-1: 0] reg_r_data_tx = 0;
-reg [d_width-1: 0] reg_l_data_tx = 0; 
-
-reg sclk_cnt = 0;  //counter of master clocks during half period of serial clock
-reg ws_cnt   = 0;  //counter of serial clock toggles during half period of word select
 
 
+reg [2: 0] sclk_cnt = 0;  //counter of master clocks during half period of serial clock
+reg [7: 0] ws_cnt   = 0;  //counter of serial clock toggles during half period of word select
 
-always@(mclk || reset_n) begin
+
+
+always@(mclk , reset_n) begin
 
     if (reset_n == 0) begin
-        sclk_cnt <= 0;                  //clear mclk/sclk counter
-        ws_cnt <= 0;                    //clear sclk/ws counter
+        sclk_cnt <= 'b0;                  //clear mclk/sclk counter
+        ws_cnt <= 'b0;                    //clear sclk/ws counter
         sclk_int <= 0;                  //clear serial clock signal
         ws_int <= 0;                    //clear word select signal
         l_data_rx_int <= 'b0;           //clear internal left channel rx data buffer
@@ -89,10 +92,10 @@ always@(mclk || reset_n) begin
                 if (sclk_int == 1 && ws_cnt > 1 && ws_cnt < d_width*2+3) begin    //falling edge of sclk during data word
                     if (ws_int == 1) begin                                          //right channel
                         r_sd_tx <= r_data_tx_int[d_width-1];                          //transmit serial data bit
-                        r_data_rx_int <= {r_data_rx_int[d_width-2 : 0] , 0};          //shift data of right channel tx data buffer
+                        r_data_tx_int <= {r_data_tx_int[d_width-2 : 0] , 1'b0};          //shift data of right channel tx data buffer
                     end else begin                                                  //left channel
                         r_sd_tx <= l_data_tx_int[d_width-1];                          //ransmit serial data bit
-                        l_data_rx_int <= {l_data_rx_int[d_width-2 : 0] , 0};          //shift data of left channel tx data buffer
+                        l_data_tx_int <= {l_data_tx_int[d_width-2 : 0] , 1'b0};          //shift data of left channel tx data buffer
                     end
                 end 
             end else begin                          //half period of ws

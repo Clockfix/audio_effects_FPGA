@@ -3,10 +3,11 @@ module debounce_switch(
     input i_switch,
     output o_switch);
 
-    parameter c_debounce_limit=250000;// 10ms at 25MHz
+//    parameter c_debounce_limit=250000;// 2.5ms at 25MHz
+        parameter c_debounce_limit=1_000_000;// 10ms at 25MHz
 
 reg r_state=1'b0;
-reg [17:0] r_count = 0;
+reg [19:0] r_count = 0;
 
     always@(posedge clk)begin
         if (i_switch != r_state && r_count < c_debounce_limit)
