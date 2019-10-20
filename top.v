@@ -17,13 +17,16 @@ module top #( parameter
     output          da_lrck,
     output          ad_lrck,
     input           ad_sdout,
-    output          da_sdin
+    output          da_sdin,
+    output  [7: 0]  JXADC       // output for logic analizer
     );
 
 //------internal wires and registers--------
 wire master_clk;            // 11.29 MHz master clock
-wire serial_clk;
-wire word_select;
+wire serial_clk_sender;
+wire word_select_sender;
+wire serial_clk_receicer;
+wire word_select_receicer;
 wire reset_n;
 wire [d_width-1: 0] r_data_tx;
 wire [d_width-1: 0] l_data_tx;
@@ -33,6 +36,19 @@ wire [d_width-1: 0] l_data_rx;
 wire w_sd_tx;               //internal wire
 
 //-----sub modules--------------------------
+// connecting signals to JXADC PMOD to monitor them with signal analyzer
+JXADC_controler JXADC_controler(
+    .ch0(master_clk),
+    .ch1(serial_clk_receicer),
+    .ch2(word_select_receicer),
+    .ch3(ad_sdout),     // serial data in
+    .ch4(master_clk),
+    .ch5(serial_clk_sender),
+    .ch6(word_select_sender),
+    .ch7(w_sd_tx),      // serial data out
+    .JXADC(JXADC)       // output for logic analizer   
+);
+
 
 //declare PLL to create 11.29 MHz master clock from 100 MHz system clock
 clk_wiz_0 m_clk(
@@ -40,20 +56,48 @@ clk_wiz_0 m_clk(
     .clk_out1(master_clk)
 );
 
-//instantiate I2S Transceiver component
-i2s_transceiver  #(
+// // instantiate I2S Transceiver component
+// i2s_transceiver  #(
+//     .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
+//     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
+//     .d_width(d_width)                       //data width
+// ) i2s_transceiver (
+//     .reset_n(reset_n),         //asynchronous active high reset
+//     .mclk(master_clk),      //master clock
+//     .sclk(serial_clk),      //serial clock (or bit clock)
+//     .ws(word_select),       //word select (or left-right clock)
+//     .sd_rx(ad_sdout),       //serial data transmit
+//     .sd_tx(w_sd_tx),        //serial data receive
+//     .l_data_tx(l_data_tx),  //left channel data to transmit
+//     .r_data_tx(r_data_tx),  //right channel data to transmit
+//     .l_data_rx(l_data_rx),  //left channel data received
+//     .r_data_rx(r_data_rx)   //right channel data received
+// );
+
+i2s_sender  #(
     .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
-) i2s_transceiver (
+) i2s_sender (
+    .reset_n(reset_n),      //asynchronous active high reset
+    .mclk(master_clk),      //master clock
+    .sclk(serial_clk_sender),      //serial clock (or bit clock)
+    .ws(word_select_sender),       //word select (or left-right clock)
+    .sd_tx(w_sd_tx),        //serial data transmit
+    .l_data_tx(l_data_tx),  //left channel data to transmit
+    .r_data_tx(r_data_tx)   //right channel data to transmit
+);
+
+i2s_receicer  #(
+    .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
+    .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
+    .d_width(d_width)                       //data width
+) i2s_receicer (
     .reset_n(reset_n),         //asynchronous active high reset
     .mclk(master_clk),      //master clock
-    .sclk(serial_clk),      //serial clock (or bit clock)
-    .ws(word_select),       //word select (or left-right clock)
-    .sd_rx(ad_sdout),       //serial data transmit
-    .sd_tx(w_sd_tx),        //serial data receive
-    .l_data_tx(l_data_tx),  //left channel data to transmit
-    .r_data_tx(r_data_tx),  //right channel data to transmit
+    .sclk(serial_clk_receicer),      //serial clock (or bit clock)
+    .ws(word_select_receicer),       //word select (or left-right clock)
+    .sd_rx(ad_sdout),       //serial data receive
     .l_data_rx(l_data_rx),  //left channel data received
     .r_data_rx(r_data_rx)   //right channel data received
 );
@@ -78,10 +122,10 @@ debounce_switch debounce_switch_reset(
 
 assign da_mclk = master_clk;    //output master clock to ADC
 assign ad_mclk = master_clk;    //output master clock to DAC
-assign da_sclk = serial_clk;    //output serial clock (from I2S Transceiver) to ADC
-assign ad_sclk = serial_clk;    //output serial clock (from I2S Transceiver) to DAC
-assign da_lrck = word_select;   //output word select (from I2S Transceiver) to ADC
-assign ad_lrck = word_select;   //output word select (from I2S Transceiver) to DAC
+assign da_sclk = serial_clk_sender;    //output serial clock (from I2S Transceiver) to ADC
+assign ad_sclk = serial_clk_receicer;    //output serial clock (from I2S Transceiver) to DAC
+assign da_lrck = word_select_sender;   //output word select (from I2S Transceiver) to ADC
+assign ad_lrck = word_select_receicer;   //output word select (from I2S Transceiver) to DAC
 
 assign da_sdin = w_sd_tx;      //assign right channel received data to transmit (to playback out received data)
 
