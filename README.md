@@ -9,3 +9,6 @@ Audio hardware
 
 Top module
 ![Top module_sh](https://sqtelw.bl.files.1drv.com/y4m3crragNjKRiiBnam_JQ72R1capMF7J4KFYmU9IC8ejan87w2KHOPl_SzV9Hyi6joKVl75qHteBc-DM81evlTdlBqJ8cgvCm6ISM2YxCEOrbJ7jEZR11jLt_6sS8Alucgz6lbZa-jescBHfFhU9g2CnuQqXTLzn9F3EoO2W4vQHQX8-6efsKfu73ZbmjWOWr9vgFpp42JJJO0DL6gPKsWxA/top-audio-effects.png?psid=1)
+
+i2s timing diagram
+![i2s timing diagram](https://jxuqnw.ch.files.1drv.com/y4m-dZeGZ7098LnxNfhcXYLc_boX5bUNKolrZoOikvJ15bhmx83OEfjXsL0DOx4bJQwo9Nj8JhPdbH3-p2_NsPtkQLQMjqqvHQD1aoTLU4iCGlzmuDkeRaJ4hOWEjlSxfPTpLuJmFxd3Co8m7PUNAHw-lSomMgNqrO4Sw_8E4K-vfiS2ijUOfIdlW4VUDLv0Dku1zcMel3jQGcMSIH0GiQyRA/i2s-loopback.png?psid=1)
