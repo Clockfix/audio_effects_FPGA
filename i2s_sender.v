@@ -70,7 +70,7 @@ always@(posedge mclk, posedge reset_n) begin
             if (ws_cnt < sclk_ws_ratio - 1) begin   //less than half period of ws
                 ws_cnt <= ws_cnt + 1;               //increment sclk/ws counter
                 
-                if (sclk_int == 1 && ws_cnt > 1 && ws_cnt < d_width*2+3) begin      //falling edge of sclk during data word
+                if (sclk_int == 1 && ws_cnt >= 1 && ws_cnt < d_width*2+3) begin      //falling edge of sclk during data word
                     if (ws_int == 1) begin                                          //right channel
                         sd_tx <= r_data_tx_int[d_width-1];                        //transmit serial data bit
                         r_data_tx_int <= {r_data_tx_int[d_width-2 : 0] , 1'b0};     //shift data of right channel tx data buffer

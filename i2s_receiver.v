@@ -42,11 +42,9 @@ reg ws_int = 0;                         //internal word select wire
 reg signed [d_width-1: 0] l_data_rx_int = 'sb0;   //internal left channel rx data buffer
 reg signed [d_width-1: 0] r_data_rx_int = 'sb0;   //internal right channel rx data buffer
 
-reg signed [d_width-1: 0] reg_r_data_rx = 'sb0;
-reg signed [d_width-1: 0] reg_l_data_rx = 'sb0; 
 
 
-reg [2: 0] sclk_cnt = 0;  //counter of master clocks during half period of serial clock
+reg [3: 0] sclk_cnt = 0;  //counter of master clocks during half period of serial clock
 reg [7: 0] ws_cnt   = 0;  //counter of serial clock toggles during half period of word select
 
 
@@ -61,7 +59,7 @@ always@(posedge mclk, posedge reset_n) begin
         l_data_rx_int <= 'sb0;           //clear internal left channel rx data buffer
         r_data_rx_int <= 'sb0;           //clear internal right channel rx data buffer
     end
-    else begin                          //master clock rising edge
+    else begin                          //master clock rising edge        
         if (sclk_cnt < mclk_sclk_ratio/2-1) begin   //less than half period of sclk
             sclk_cnt <= sclk_cnt + 1;               //increment mclk/sclk counter
         end
