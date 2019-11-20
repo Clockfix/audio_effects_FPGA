@@ -1,4 +1,4 @@
-// This I2S Playback design uses the common 44.1 kHz 
+// This I2S design uses the common 44.1 kHz 
 // sampling frequency.  
 // From Figure 2 in Section 4.1.1 of the CS5343 
 // Datasheet, it is appropriate to use an SCLK/LRCK 
