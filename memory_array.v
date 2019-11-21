@@ -7,14 +7,14 @@ module memory_array(
     input   [4:0]   rptr
 );  
      
-    reg     [7:0]   data_out2   [15:0];  
+    reg     [7:0]   data_array   [15:0];  
     wire    [7:0]   data_out;
 
     always @(posedge clk)  
     begin  
         if(fifo_we)   
-            data_out2[wptr[3:0]] <=data_in ;  
+            data_array[wptr[3:0]] <= data_in ;  
     end  
 
-    assign data_out = data_out2[rptr[3:0]];  
+    assign data_out = data_array[rptr[3:0]];  
 endmodule  

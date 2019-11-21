@@ -13,15 +13,15 @@ module fifo_mem(
     input           rd, 
     input   [7:0]   data_in
 );  
-    wire    [4:0]   wptr,
-                    rptr;  
-    wire            fifo_we,
-                    fifo_rd;   
+    wire    [4:0]   w_wptr,
+                    w_rptr;  
+    wire            w_fifo_we,
+                    w_fifo_rd;   
 
 // sub modules
     write_pointer write_pointer(
-        .wptr(wptr),
-        .fifo_we(fifo_we),
+        .wptr(w_wptr),
+        .fifo_we(w_fifo_we),
         .wr(wr),
         .fifo_full(fifo_full),
         .clk(clk),
@@ -29,8 +29,8 @@ module fifo_mem(
     );  
 
     read_pointer read_pointer(
-        .rptr(rptr),
-        .fifo_rd(fifo_rd),
+        .rptr(w_rptr),
+        .fifo_rd(w_fifo_rd),
         .rd(rd),
         .fifo_empty(fifo_empty),
         .clk(clk),
@@ -38,10 +38,10 @@ module fifo_mem(
     );  
 
     memory_array memory_array(
-        .data_out(data_out), 
-        .data_in(data_in), 
+        .data_out(w_data_out), 
+        .data_in(w_data_in), 
         .clk(clk),
-        .fifo_we(fifo_we), 
+        .fifo_we(w_fifo_we), 
         .wptr(wptr),
         .rptr(rptr)
     );  
@@ -50,15 +50,15 @@ module fifo_mem(
     status_signal status_signal(
         .fifo_full(fifo_full), 
         .fifo_empty(fifo_empty), 
-        .fifo_threshold(), 
+        .fifo_threshold(fifo_threshold), 
         .fifo_overflow(fifo_overflow), 
         .fifo_underflow(fifo_underflow), 
         .wr(wr), 
         .rd(rd), 
-        .fifo_we(fifo_we), 
-        .fifo_rd(fifo_rd), 
-        .wptr(wptr),
-        .rptr(rptr),
+        .fifo_we(w_fifo_we), 
+        .fifo_rd(w_fifo_rd), 
+        .wptr(w_wptr),
+        .rptr(w_rptr),
         .clk(clk),
         .rst_n(rst_n)
     );  

@@ -8,7 +8,7 @@ module read_pointer(
    
     reg     [4:0]   rptr;  
     
-    assign fifo_rd = (~fifo_empty)& rd;  
+    assign fifo_rd = (~fifo_empty) & rd;  
 
     always @(posedge clk or negedge rst_n)  
     begin  
