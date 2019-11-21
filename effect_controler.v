@@ -7,8 +7,8 @@ module effect_controler #( parameter
     input                               reset,
     input   signed      [d_width-1: 0]  i_l_data,
     input   signed      [d_width-1: 0]  i_r_data,
-    output   signed  [d_width-1: 0]  o_l_data,
-    output   signed  [d_width-1: 0]  o_r_data
+    output  signed      [d_width-1: 0]  o_l_data,
+    output  signed      [d_width-1: 0]  o_r_data
 );
 
 

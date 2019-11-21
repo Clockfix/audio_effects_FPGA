@@ -1,17 +1,17 @@
 // Fifo code source:
 // https://vlsicoding.blogspot.com/2013/11/verilog-code-for-synchronous-fifo.html
 // 
-module sync_fifo #(
+module sync_fifo #( parameter
 //---------------parametre declaration
-   parameter    data_width       = 4,
-   parameter    address_width    = 4,
-   parameter    ram_depth        = 16 
+   data_width       = 4,
+   address_width    = 4,
+   ram_depth        = 16 
 )(
 //--------------input output port declaration
-   output reg  [data_width-1:0]  data_out,
+   output reg signed [data_width-1:0]  data_out,
    output                        full,
    output                        empty,
-   input       [data_width-1:0]  data_in,
+   input     signed  [data_width-1:0]  data_in,
    input                         clk,
    input                         rst_a,
    input                         wr_en,
@@ -22,8 +22,8 @@ module sync_fifo #(
 reg      [address_width-1:0]     wr_pointer;
 reg      [address_width-1:0]     rd_pointer;
 reg      [address_width :0]      status_count;
-reg      [data_width-1:0]        data_out ;
-wire     [data_width-1:0]        data_ram ;
+reg   signed   [data_width-1:0]        data_out ;
+wire  signed   [data_width-1:0]        data_ram ;
 
 
  
@@ -67,7 +67,7 @@ wire     [data_width-1:0]        data_ram ;
 assign full = (status_count == (ram_depth));
 assign empty = (status_count == 0);
  
-ram #( 
+blockram #( 
    .DEPTH(ram_depth),
    .ADDR_WIDTH(address_width),
    .DATA_WIDTH(data_width)

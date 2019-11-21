@@ -7,16 +7,16 @@
 // Dual-Port Block RAM with Two Write Ports
 // File: blobkram.v
 
-module ram #( parameter
+module blockram #( parameter
     DEPTH =  16,
     ADDR_WIDTH = 4, 
     DATA_WIDTH = 24 ) (clka,clkb,ena,enb,wea,web,addra,addrb,dia,dib,doa,dob);
 
 input                       clka,clkb,ena,enb,wea,web;
 input   [ADDR_WIDTH-1:0]    addra,addrb;
-input   [DATA_WIDTH-1:0]    dia,dib;
-output  [DATA_WIDTH-1:0]    doa,dob;
-reg     [ADDR_WIDTH-1:0]    ram     [ DEPTH - 1 :0];
+input  signed [DATA_WIDTH-1:0]    dia,dib;
+output signed [DATA_WIDTH-1:0]    doa,dob;
+reg     [DATA_WIDTH-1:0]    ram     [ DEPTH - 1 :0];
 reg     [DATA_WIDTH-1:0]    doa,dob;
 
 always @(posedge clka)
