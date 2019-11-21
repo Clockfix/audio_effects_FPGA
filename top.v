@@ -6,7 +6,8 @@
 module top #( parameter
     sclk_ws_ratio = 64,         // number of sclk periods per word select period
     mclk_sclk_ratio = 4,        // number of mclk periods per sclk period
-    d_width = 24                // data width
+    d_width = 24,               // data width for I2S
+    memory_d_width = 16         // data width for memory (and effects). lower bits are ignored
 )(
     input           clk,
     input           btnC,
@@ -104,7 +105,8 @@ i2s_receicer  #(
 
 //passing data to effect controler
 effect_controler #(
-    .d_width(d_width)                       //data width
+    .d_width(d_width),                       //data width
+    .memory_d_width(memory_d_width)
 ) effect_controler (
     .reset(reset_n),                    //asynchronous active high reset
     .clk(master_clk),

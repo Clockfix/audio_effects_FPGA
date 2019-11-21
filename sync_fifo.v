@@ -11,6 +11,7 @@ module sync_fifo #( parameter
    output reg signed [data_width-1:0]  data_out,
    output                        full,
    output                        empty,
+   output  [address_width:0]     data_fill,
    input     signed  [data_width-1:0]  data_in,
    input                         clk,
    input                         rst_a,
@@ -19,10 +20,9 @@ module sync_fifo #( parameter
  
 
 //--------------internal register declaration
-reg      [address_width-1:0]     wr_pointer;
-reg      [address_width-1:0]     rd_pointer;
-reg      [address_width :0]      status_count;
-reg   signed   [data_width-1:0]        data_out ;
+reg      [address_width-1:0]     wr_pointer = 0;
+reg      [address_width-1:0]     rd_pointer = 0;
+reg      [address_width :0]      status_count = 0;
 wire  signed   [data_width-1:0]        data_ram ;
 
 
@@ -66,8 +66,9 @@ wire  signed   [data_width-1:0]        data_ram ;
 
 assign full = (status_count == (ram_depth));
 assign empty = (status_count == 0);
+assign data_fill = status_count;       // how full are FIFO
  
-blockram #( 
+rams_tdp_rf_rf #( 
    .DEPTH(ram_depth),
    .ADDR_WIDTH(address_width),
    .DATA_WIDTH(data_width)
