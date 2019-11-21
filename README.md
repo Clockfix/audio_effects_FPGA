@@ -13,5 +13,5 @@ Top module
 i2s timing diagram
 ![i2s timing diagram](https://jxuqnw.ch.files.1drv.com/y4m-dZeGZ7098LnxNfhcXYLc_boX5bUNKolrZoOikvJ15bhmx83OEfjXsL0DOx4bJQwo9Nj8JhPdbH3-p2_NsPtkQLQMjqqvHQD1aoTLU4iCGlzmuDkeRaJ4hOWEjlSxfPTpLuJmFxd3Co8m7PUNAHw-lSomMgNqrO4Sw_8E4K-vfiS2ijUOfIdlW4VUDLv0Dku1zcMel3jQGcMSIH0GiQyRA/i2s-loopback.png?psid=1)
 
-Edit Efect controler module - now it have FIFO memory
+Edited effect control module - now it has FIFO memory
 ![efect_controler](https://pgow6w.ch.files.1drv.com/y4mif2QPivMnj_nQp95Yc-kInSbnaIxWAzMxGYeZyCNiJOPYdVBMWxzusnKvldGU-YYT-GSQ8sBSAg-Wo8VFqW6cQ61Kx5COHV7Yq5e86DLo7dnwmncAHgkoYNpX2_ciRAsf4Npob9v_H6Bs3KGwJCqXzSSWf3XSEvavt-iGzYch1ImTnXIpnAbRLFpQxczbDbw2NgiaEf2yZNJYD7PjvHBBg/efect_controler.png?psid=1)
