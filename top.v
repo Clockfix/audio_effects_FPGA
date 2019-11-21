@@ -106,7 +106,8 @@ i2s_receicer  #(
 effect_controler #(
     .d_width(d_width)                       //data width
 ) effect_controler (
-//  .clk(clk),
+    .reset(reset_n),                    //asynchronous active high reset
+    .clk(master_clk),
     .i_l_data(l_data_rx),               //left channel data received         
     .i_r_data(r_data_rx),               //right channel data received
     .o_l_data(l_data_tx),               //left channel data to transmit
