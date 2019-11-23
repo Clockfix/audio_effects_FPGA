@@ -11,6 +11,7 @@ module top #( parameter
 )(
     input           clk,
     input           btnC,
+    input   [1:0]   sw,         // swiches on board to control effects
     output          da_mclk,
     output          ad_mclk,
     output          da_sclk,
@@ -94,37 +95,38 @@ io_module  #(
 
 //Effect controler controls effects and perfoms multiplexing and data marging
 effect_controler #(
-    .d_width(d_width),                       //data width
+    .d_width(d_width),                  // data width
     .memory_d_width(memory_d_width)
 ) effect_controler (
-    .reset(reset_n),                    //asynchronous active high reset
+    .reset(reset_n),                    // asynchronous active high reset
     .mclk(master_clk),
     .clk(clk_25MHz),
-    .i_l_data(l_data_rx),               //left channel data received         
-    .i_r_data(r_data_rx),               //right channel data received
-    .o_l_data(l_data_tx),               //left channel data to transmit
-    .o_r_data(r_data_tx),               //right channel data to transmit
+    .i_l_data(l_data_rx),               // left channel data received         
+    .i_r_data(r_data_rx),               // right channel data received
+    .o_l_data(l_data_tx),               // left channel data to transmit
+    .o_r_data(r_data_tx),               // right channel data to transmit
 
     .o_data_to_eff(w_data_to_eff),      // Data output to effects module
     .o_data_valid(w_dv_to_eff),         // data valid to read (FIFO not empty). data valid signal to effect module
     
-    .i_read_enable(w_rd_en_from_eff),       //read enable from Effect module
-    .i_data_from_eff(w_data_from_eff),     // Data input from effects module
-    .i_dv_from_eff(w_dv_from_eff)         // data valid write (FIFO not full). data valid signal from effect module
+    .i_read_enable(w_rd_en_from_eff),   // read enable from Effect module
+    .i_data_from_eff(w_data_from_eff),  // Data input from effects module
+    .i_dv_from_eff(w_dv_from_eff)       // data valid write (FIFO not full). data valid signal from effect module
 );
 
 
 //Effect module contains all individual effects  
 effect_module #(
-    .d_width(memory_d_width)                    //data width
+    .d_width(memory_d_width)                    // data width
 ) effect_module (
     .clk(clk_25MHz),
     .reset(reset_n),
-    .i_data_ready(w_dv_to_eff),                // data ready to read
+    .sw(sw),                                    // effect control swiches
+    .i_data_ready(w_dv_to_eff),                 // data ready to read
     .i_data(w_data_to_eff),                     // data input form effect controler
-    .read_enable(w_rd_en_from_eff),                             // enable data reading
+    .o_read_enable(w_rd_en_from_eff),           // enable data reading
     .o_data(w_data_from_eff),
-    .data_valid(w_dv_from_eff)
+    .o_data_valid(w_dv_from_eff)
 
 );
 
