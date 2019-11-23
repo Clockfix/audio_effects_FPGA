@@ -7,13 +7,13 @@ module clock_divider #(
     parameter DIVIDER =2,
     parameter WIDTH =2
 ) (
-    input clk,
+    input clk_in,
     output clk_out);
 
 reg state=1'b0, next_state=1'b1;
 reg [WIDTH-1:0] counter = DIVIDER-1 ; 
 
-always@(posedge clk)begin
+always@(posedge clk_in)begin
     state <= next_state;
     if ( counter == 0) begin
         next_state <= ~next_state;

@@ -1,8 +1,8 @@
 //      TOP module 
 //       
-
-
-
+//
+//
+//
 module top #( parameter
     sclk_ws_ratio = 64,         // number of sclk periods per word select period
     mclk_sclk_ratio = 4,        // number of mclk periods per sclk period
@@ -22,115 +22,111 @@ module top #( parameter
     output  [7: 0]  JXADC       // output for logic analizer
     );
 
+assign da_mclk = master_clk;    //output master clock to ADC
+assign ad_mclk = master_clk;    //output master clock to DAC
+// assign da_sdin = w_sd_tx;      //assign received data to transmit (to playback out received data)
+
+
 //------internal wires and registers--------
 wire master_clk;            // 11.29 MHz master clock
-wire serial_clk_sender;
-wire word_select_sender;
-wire serial_clk_receicer;
-wire word_select_receicer;
+
+wire clk_25MHz;             // 
+
 wire reset_n;
 wire [d_width-1: 0] r_data_tx;
 wire [d_width-1: 0] l_data_tx;
 wire [d_width-1: 0] r_data_rx;
 wire [d_width-1: 0] l_data_rx;
 
-wire w_sd_tx;               //internal wire
+wire [d_width-1: 0] w_data_to_eff;
+wire                w_dv_to_eff;  
+
+wire [d_width-1: 0] w_data_from_eff;
+wire                w_dv_from_eff; 
+
+wire                w_rd_en_from_eff;
 
 //-----sub modules--------------------------
-// connecting signals to JXADC PMOD to monitor them with signal analyzer
-JXADC_controler JXADC_controler(
-    .ch0(master_clk),
-    .ch1(serial_clk_receicer),
-    .ch2(word_select_receicer),
-    .ch3(ad_sdout),     // serial data in
-    .ch4(master_clk),
-    .ch5(serial_clk_sender),
-    .ch6(word_select_sender),
-    .ch7(w_sd_tx),      // serial data out
-    .JXADC(JXADC)       // output for logic analizer   
-);
 
-
-//declare PLL to create 11.29 MHz master clock from 100 MHz system clock
+//declare PLL to create 11.29 MHz master clock from 100 MHz system clock for I2S
 clk_wiz_0 m_clk(
     .clk_in1(clk),
-    .clk_out1(master_clk)
+    .clk_out1(master_clk),  // 11.29 MHz master clock for I2S
+    .clk_out2(clk_25MHz)   // 25MHz main clock
 );
 
-// // instantiate I2S Transceiver component
-// i2s_transceiver  #(
-//     .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
-//     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
-//     .d_width(d_width)                       //data width
-// ) i2s_transceiver (
-//     .reset_n(reset_n),         //asynchronous active high reset
-//     .mclk(master_clk),      //master clock
-//     .sclk(serial_clk),      //serial clock (or bit clock)
-//     .ws(word_select),       //word select (or left-right clock)
-//     .sd_rx(ad_sdout),       //serial data transmit
-//     .sd_tx(w_sd_tx),        //serial data receive
-//     .l_data_tx(l_data_tx),  //left channel data to transmit
-//     .r_data_tx(r_data_tx),  //right channel data to transmit
-//     .l_data_rx(l_data_rx),  //left channel data received
-//     .r_data_rx(r_data_rx)   //right channel data received
-// );
 
-i2s_sender  #(
+io_module  #(
     .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
-) i2s_sender (
-    .reset_n(reset_n),      //asynchronous active high reset
-    .mclk(master_clk),      //master clock
-    .sclk(serial_clk_sender),      //serial clock (or bit clock)
-    .ws(word_select_sender),       //word select (or left-right clock)
-    .sd_tx(w_sd_tx),        //serial data transmit
-    .l_data_tx(l_data_tx),  //left channel data to transmit
-    .r_data_tx(r_data_tx)   //right channel data to transmit
+) io_module (
+    .reset_n(reset_n),                  //asynchronous active high reset
+    .mclk(master_clk),                  //master clock
+    .da_sclk(da_sclk),                  //serial clock (or bit clock)
+    .da_ws(da_lrck),                    //word select (or left-right clock)
+    .ad_sclk(ad_sclk),                  //serial clock (or bit clock)
+    .ad_ws(ad_lrck),                    //word select (or left-right clock)
+    .sd_tx(da_sdin),                    //serial data transmit
+    .sd_rx(ad_sdout),                   //serial data receive
+    .l_data_tx(l_data_tx),              //left channel data to transmit
+    .r_data_tx(r_data_tx),              //right channel data to transmit
+
+    .btnC(btnC),                        //reset button input
+
+    .l_data_rx(l_data_rx),              //left channel data received
+    .r_data_rx(r_data_rx),              //right channel data received
+
+
+    // // inputs to logic analyzer
+    // .ch0(),
+    // .ch1(),
+    // .ch2(),
+    // .ch3(),
+    // .ch4(),
+    // .ch5(),
+    // .ch6(),
+    // .ch7(),
+
+    .JXADC(JXADC)                       // output for logic analizer
 );
 
-i2s_receicer  #(
-    .mclk_sclk_ratio(mclk_sclk_ratio),      //number of mclk periods per sclk period
-    .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
-    .d_width(d_width)                       //data width
-) i2s_receicer (
-    .reset_n(reset_n),         //asynchronous active high reset
-    .mclk(master_clk),      //master clock
-    .sclk(serial_clk_receicer),      //serial clock (or bit clock)
-    .ws(word_select_receicer),       //word select (or left-right clock)
-    .sd_rx(ad_sdout),       //serial data receive
-    .l_data_rx(l_data_rx),  //left channel data received
-    .r_data_rx(r_data_rx)   //right channel data received
-);
 
-//passing data to effect controler
+//Effect controler controls effects and perfoms multiplexing and data marging
 effect_controler #(
     .d_width(d_width),                       //data width
     .memory_d_width(memory_d_width)
 ) effect_controler (
     .reset(reset_n),                    //asynchronous active high reset
-    .clk(master_clk),
+    .mclk(master_clk),
+    .clk(clk_25MHz),
     .i_l_data(l_data_rx),               //left channel data received         
     .i_r_data(r_data_rx),               //right channel data received
     .o_l_data(l_data_tx),               //left channel data to transmit
-    .o_r_data(r_data_tx)                //right channel data to transmit
+    .o_r_data(r_data_tx),               //right channel data to transmit
+
+    .o_data_to_eff(w_data_to_eff),      // Data output to effects module
+    .o_data_valid(w_dv_to_eff),         // data valid to read (FIFO not empty). data valid signal to effect module
+    
+    .i_read_enable(w_rd_en_from_eff),       //read enable from Effect module
+    .i_data_from_eff(w_data_from_eff),     // Data input from effects module
+    .i_dv_from_eff(w_dv_from_eff)         // data valid write (FIFO not full). data valid signal from effect module
 );
 
-//debounce reset button
-debounce_switch debounce_switch_reset(
-    .clk(master_clk),
-    .i_switch(btnC),
-    .o_switch(reset_n)
+
+//Effect module contains all individual effects  
+effect_module #(
+    .d_width(memory_d_width)                    //data width
+) effect_module (
+    .clk(clk_25MHz),
+    .reset(reset_n),
+    .i_data_ready(w_dv_to_eff),                // data ready to read
+    .i_data(w_data_to_eff),                     // data input form effect controler
+    .read_enable(w_rd_en_from_eff),                             // enable data reading
+    .o_data(w_data_from_eff),
+    .data_valid(w_dv_from_eff)
+
 );
-
-assign da_mclk = master_clk;    //output master clock to ADC
-assign ad_mclk = master_clk;    //output master clock to DAC
-assign da_sclk = serial_clk_sender;    //output serial clock (from I2S Transceiver) to ADC
-assign ad_sclk = serial_clk_receicer;    //output serial clock (from I2S Transceiver) to DAC
-assign da_lrck = word_select_sender;   //output word select (from I2S Transceiver) to ADC
-assign ad_lrck = word_select_receicer;   //output word select (from I2S Transceiver) to DAC
-
-assign da_sdin = w_sd_tx;      //assign right channel received data to transmit (to playback out received data)
 
 
 endmodule
