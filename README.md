@@ -17,3 +17,6 @@ Edited effect control module - now it has input and output FIFO memory
 
 IO module
 ![io_module](https://b6w9pw.ch.files.1drv.com/y4mgPXnMZOMUJWVUBhbHNP217wE84t29_bt9uDZ7lbozZTPFiq3Ncan_uSvk7YjRzmkIPma5t_dcwxAvLgd8ZV5n1GBIzJ5cCEiS1gCR0y7y4x5brYBBRXjJh5VXI0ITpQRCvlggTSzNZE4b7Ux8hvzoxa586RGty8d-a1eblClQE3GD4QAiPMV0CrT-ROt7axdN_ArKMn0HKHCYomtW3Gu4A/io_module.png)
+
+Effects module with one clipping effect
+![io_module](https://py4mqq.ch.files.1drv.com/y4mTNx7uadLpgzZS25DmRBpSdpjp7ZVKQSa3nqT1l7BgoZh-a-Vo1FJomfkZkxDLSOV6L2-t4WzZANAXqGHHrOU4-gc3n76tU7Ma1ioPsnzF4kJ3BgREYPFypvR0sFBOgeKOlP1h-zvRmVaMUxYLNKgbwOnsUKcZYvcevxhgMEnLin7xOAvLoWpxXBNogr0z1LwiEZb0S4i3t2CQqyN7EKyWQ/effect_module.png?psid=1)
