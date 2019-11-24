@@ -3,7 +3,7 @@ module io_module #( parameter
     mclk_sclk_ratio = 4,        // number of mclk periods per sclk period
     d_width = 24                // data width
 )(
-    output reset_n,                             //asynchronous active low reset
+    //output reset,                             //asynchronous active low reset
     input  mclk,                                //master clock
     output ad_sclk,                             //serial clock (or bit clock)
     output ad_ws,                               //word select (or left-right clock)
@@ -18,7 +18,7 @@ module io_module #( parameter
     output signed [d_width-1: 0] l_data_rx,            //left channel data received
     output signed [d_width-1: 0] r_data_rx,             //right channel data received   
 
-    input btnC,
+    input reset,
     
     // // inputs to logic analyzer
     // input           ch0,
@@ -41,7 +41,7 @@ i2s_sender  #(
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
 ) i2s_sender (
-    .reset_n(reset_n),      //asynchronous active high reset
+    .reset_n(reset),        //asynchronous active high reset
     .mclk(mclk),            //master clock
     .sclk(da_sclk),         //serial clock (or bit clock)
     .ws(da_ws),             //word select (or left-right clock)
@@ -57,10 +57,10 @@ i2s_receicer  #(
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
 ) i2s_receicer (
-    .reset_n(reset_n),          //asynchronous active high reset
+    .reset_n(reset),            //asynchronous active high reset
     .mclk(mclk),                //master clock
     .sclk(ad_sclk),             //serial clock (or bit clock)
-    .ws(ad_ws),                //word select (or left-right clock)
+    .ws(ad_ws),                 //word select (or left-right clock)
     .sd_rx(sd_rx),              //serial data receive
     .l_data_rx(l_data_rx),      //left channel data received
     .r_data_rx(r_data_rx)       //right channel data received
@@ -80,11 +80,11 @@ JXADC_controler JXADC_controler(
     .JXADC(JXADC)       // output for logic analizer   
 );
 
-// debounce reset button
-debounce_switch debounce_switch_reset(
-    .clk(mclk),
-    .i_switch(btnC),
-    .o_switch(reset_n)
-);
+// // debounce reset button
+// debounce_switch debounce_switch_reset(
+//     .clk(mclk),
+//     .i_switch(btnC),
+//     .o_switch(reset_n)
+// );
 
 endmodule

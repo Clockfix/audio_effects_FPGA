@@ -33,7 +33,9 @@ wire master_clk;            // 11.29 MHz master clock
 
 wire clk_25MHz;             // 
 
-wire reset_n;
+wire                w_reset, w_reset1, w_reset2, w_reset3, 
+                    w_reset4, w_reset5;
+
 wire [d_width-1: 0] r_data_tx;
 wire [d_width-1: 0] l_data_tx;
 wire [d_width-1: 0] r_data_rx;
@@ -47,14 +49,41 @@ wire                w_dv_from_eff;
 
 wire                w_rd_en_from_eff;
 
+wire                w_internal_reset;
+
 //-----sub modules--------------------------
 
-//declare PLL to create 11.29 MHz master clock from 100 MHz system clock for I2S
+// declare PLL to create 11.29 MHz master clock from 100 MHz system clock for I2S
+//
+// Common clocking errors with 7-Series FPGAs
+// http://www.markharvey.info/art/7clk_19.10.2015/7clk_19.10.2015.html
 clk_wiz_0 m_clk(
     .clk_in1(clk),
     .clk_out1(master_clk),  // 11.29 MHz master clock for I2S
-    .clk_out2(clk_25MHz)   // 25MHz main clock
+    .clk_out2(clk_25MHz),   // 25MHz main clock
+    .locked(w_internal_reset),
+    .reset(btnC)
 );
+
+// Flip-flops for reset
+d_flipflop_sync_rst D_flipflop1 (
+    .D(1'b0),
+    .Q(w_reset1),
+    .clk(master_clk),
+    .reset(~w_internal_reset));
+
+d_flipflop_sync_rst D_flipflop2 (
+    .D(w_reset1),
+    .Q(w_reset2),
+    .clk(master_clk),
+    .reset(~w_internal_reset));
+
+d_flipflop_sync_rst D_flipflop3 (
+    .D(w_reset2),
+    .Q(w_reset),
+    .clk(master_clk),
+    .reset(~w_internal_reset));
+
 
 
 io_module  #(
@@ -62,7 +91,7 @@ io_module  #(
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
 ) io_module (
-    .reset_n(reset_n),                  //asynchronous active high reset
+    //.reset_n(reset_n),                  //asynchronous active high reset
     .mclk(master_clk),                  //master clock
     .da_sclk(da_sclk),                  //serial clock (or bit clock)
     .da_ws(da_lrck),                    //word select (or left-right clock)
@@ -73,7 +102,7 @@ io_module  #(
     .l_data_tx(l_data_tx),              //left channel data to transmit
     .r_data_tx(r_data_tx),              //right channel data to transmit
 
-    .btnC(btnC),                        //reset button input
+    .reset(w_reset),           //reset 
 
     .l_data_rx(l_data_rx),              //left channel data received
     .r_data_rx(r_data_rx),              //right channel data received
@@ -98,7 +127,7 @@ effect_controler #(
     .d_width(d_width),                  // data width
     .memory_d_width(memory_d_width)
 ) effect_controler (
-    .reset(reset_n),                    // asynchronous active high reset
+    .reset(w_reset),                    // asynchronous active high reset
     .mclk(master_clk),
     .clk(clk_25MHz),
     .i_l_data(l_data_rx),               // left channel data received         
@@ -120,7 +149,7 @@ effect_module #(
     .d_width(memory_d_width)                    // data width
 ) effect_module (
     .clk(clk_25MHz),
-    .reset(reset_n),
+    .reset(w_reset),
     .sw(sw),                                    // effect control swiches
     .i_data_ready(w_dv_to_eff),                 // data ready to read
     .i_data(w_data_to_eff),                     // data input form effect controler
