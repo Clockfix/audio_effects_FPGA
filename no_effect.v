@@ -1,11 +1,10 @@
-module clipping_effect #( parameter
+module no_effect #( parameter
     data_width = 16          // data width 
 )(
     input                                   clk,
     input                                   reset,
     input   signed      [data_width-1: 0]   i_data,
     output  signed      [data_width-1: 0]   o_data,
-    input   signed      [data_width-1: 0]   i_treshhold,
     input                                   i_read_done,
     output                                  o_read_enable,
     output                                  o_data_valid,
@@ -13,15 +12,12 @@ module clipping_effect #( parameter
 );
 
 //-------------Internal Constants---------------------------
-localparam [2:0]        IDLE         = 'd0,
-                        CLIP         = 'd1,
-                        OUTPUT       = 'd2;
+localparam [3:0]        IDLE         = 'd0,
+                        OUTPUT       = 'd1;
 
-reg [2:0] r_state=IDLE, r_next=IDLE;
+reg [3:0] r_state=IDLE, r_next=IDLE;
 
 reg   signed      [data_width-1: 0]     r_data = 'b0;
-reg   signed      [data_width-1: 0]     r_treshhold_p = 'b0;
-reg   signed      [data_width-1: 0]     r_treshhold_n = 'b0;
 reg                                     r_read_enable = 0;
 reg                                     r_data_valid = 0;
 
@@ -49,10 +45,8 @@ always @(posedge clk ) begin
     case(r_state)
         IDLE    :   begin
                         if (i_data_ready == 1) begin
-                            r_next <= CLIP;
+                            r_next <= OUTPUT;
                             r_data <= i_data;
-                            r_treshhold_p <= i_treshhold;
-                            r_treshhold_n <= 0 - i_treshhold;
                             r_read_enable <= 0;
                             r_data_valid <= 0;
                         end
@@ -61,21 +55,6 @@ always @(posedge clk ) begin
                             r_read_enable <= 1;     // redy to read data
                             r_data_valid <= 0;
                         end                     
-                    end
-        CLIP    :   begin
-                        case (r_data < 0 ) 
-                            0   :   begin           // positive number
-                                        if (r_data > r_treshhold_p)
-                                            r_data <= r_treshhold_p;
-                                    end
-                            1   :   begin           // negative number               
-                                        if (r_data < r_treshhold_n)
-                                            r_data <= r_treshhold_n;
-                                    end                  
-                        endcase
-                        r_next <= OUTPUT;
-                        r_data_valid <= 0;
-                        r_read_enable <= 0;     // read disable
                     end
         OUTPUT  :   begin
                         if (i_read_done == 1) begin

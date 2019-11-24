@@ -35,21 +35,28 @@ wire clk_25MHz;             //
 
 wire                w_reset, w_reset1, w_reset2, w_reset3, 
                     w_reset4, w_reset5;
+wire                w_internal_reset;
 
 wire [d_width-1: 0] r_data_tx;
 wire [d_width-1: 0] l_data_tx;
 wire [d_width-1: 0] r_data_rx;
 wire [d_width-1: 0] l_data_rx;
 
+
 wire [d_width-1: 0] w_data_to_eff;
 wire                w_dv_to_eff;  
 
-wire [d_width-1: 0] w_data_from_eff;
 wire                w_dv_from_eff; 
-
 wire                w_rd_en_from_eff;
 
-wire                w_internal_reset;
+wire                w_read_done_eff;        // read done from effects module to mixer 
+wire                w_read_ready_eff;       // ready to read from effects module   
+
+// Data wires from effects module to effect controler
+wire [d_width-1: 0] w_data_from_eff_sw0;
+wire [d_width-1: 0] w_data_from_eff_sw1;
+
+
 
 //-----sub modules--------------------------
 
@@ -129,18 +136,22 @@ effect_controler #(
 ) effect_controler (
     .reset(w_reset),                    // asynchronous active high reset
     .mclk(master_clk),
+    .sw(sw),
     .clk(clk_25MHz),
     .i_l_data(l_data_rx),               // left channel data received         
     .i_r_data(r_data_rx),               // right channel data received
     .o_l_data(l_data_tx),               // left channel data to transmit
     .o_r_data(r_data_tx),               // right channel data to transmit
+    .o_read_done(w_read_done_eff),      // read done from effects controler
+    .o_read_ready(w_read_ready_eff),    // ready read from reefects module
 
     .o_data_to_eff(w_data_to_eff),      // Data output to effects module
     .o_data_valid(w_dv_to_eff),         // data valid to read (FIFO not empty). data valid signal to effect module
     
     .i_read_enable(w_rd_en_from_eff),   // read enable from Effect module
-    .i_data_from_eff(w_data_from_eff),  // Data input from effects module
-    .i_dv_from_eff(w_dv_from_eff)       // data valid write (FIFO not full). data valid signal from effect module
+    .i_dv_from_eff(w_dv_from_eff),      // data valid write (FIFO not full). data valid signal from effect module
+    .i_data_from_eff_sw0(w_data_from_eff_sw0),   // Data input from effects module
+    .i_data_from_eff_sw1(w_data_from_eff_sw1)    // Data input from effects module
 );
 
 
@@ -152,10 +163,12 @@ effect_module #(
     .reset(w_reset),
     .sw(sw),                                    // effect control swiches
     .i_data_ready(w_dv_to_eff),                 // data ready to read
+    .i_read_done(w_read_done_eff),              // read done from effects controler
     .i_data(w_data_to_eff),                     // data input form effect controler
     .o_read_enable(w_rd_en_from_eff),           // enable data reading
-    .o_data(w_data_from_eff),
-    .o_data_valid(w_dv_from_eff)
+    .o_data_valid(w_dv_from_eff),
+    .o_data_sw0(w_data_from_eff_sw0),
+    .o_data_sw1(w_data_from_eff_sw1)
 
 );
 
