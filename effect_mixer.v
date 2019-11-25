@@ -101,7 +101,7 @@ always @(posedge clk ) begin
                                         r_data_norm <= r_data_add[data_width-1: 0];
                                     end
                             3   :   begin           // no effect and clipping effect               
-                                        r_data_norm <= r_data_add[data_width-1: 0] >>> 1;     // Shift Right, Arithmetic (keep sign) 
+                                        r_data_norm <= r_data_add[data_width  : 1] ;     // Shift Right
                                     end                
                         endcase
                         r_next <= OUTPUT;
