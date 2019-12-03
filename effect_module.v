@@ -60,7 +60,7 @@ clipping_effect #(
 ) clipping_effect (
     .clk(clk),
     .reset(reset),
-    .i_treshhold( {i_treshhold, 2'b00} ),
+    .i_treshhold( {2'b00, i_treshhold } ),
     .i_data(i_data),
     .i_read_done(i_read_done),         // read done from effects controler
     .i_data_ready(i_data_ready),
