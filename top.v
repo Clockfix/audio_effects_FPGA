@@ -11,7 +11,9 @@ module top #( parameter
 )(
     input           clk,
     input           btnC,
-    input   [1:0]   sw,         // swiches on board to control effects
+    output  [15:0]  led, 
+    // input   [1:0]   sw,         // swiches on board to control effects
+    input   [15:0]   sw,         // swiches on board to control effects
     output          da_mclk,
     output          ad_mclk,
     output          da_sclk,
@@ -23,6 +25,9 @@ module top #( parameter
     output  [7: 0]  JXADC       // output for logic analizer
     );
 
+//assign output from effect controler to leds
+assign led = l_data_tx[d_width-1: d_width-16];
+
 assign da_mclk = master_clk;    //output master clock to ADC
 assign ad_mclk = master_clk;    //output master clock to DAC
 // assign da_sdin = w_sd_tx;      //assign received data to transmit (to playback out received data)
@@ -31,16 +36,16 @@ assign ad_mclk = master_clk;    //output master clock to DAC
 //------internal wires and registers--------
 wire master_clk;            // 11.29 MHz master clock
 
-wire clk_25MHz;             // 
+wire clk_50MHz;             // 
 
 wire                w_reset, w_reset1, w_reset2, w_reset3, 
                     w_reset4, w_reset5;
 wire                w_internal_reset;
 
-wire [d_width-1: 0] r_data_tx;
-wire [d_width-1: 0] l_data_tx;
-wire [d_width-1: 0] r_data_rx;
-wire [d_width-1: 0] l_data_rx;
+wire signed [d_width-1: 0] r_data_tx;
+wire signed [d_width-1: 0] l_data_tx;
+wire signed [d_width-1: 0] r_data_rx;
+wire signed [d_width-1: 0] l_data_rx;
 
 
 wire [d_width-1: 0] w_data_to_eff;
@@ -67,7 +72,7 @@ wire [d_width-1: 0] w_data_from_eff_sw1;
 clk_wiz_0 m_clk(
     .clk_in1(clk),
     .clk_out1(master_clk),  // 11.29 MHz master clock for I2S
-    .clk_out2(clk_25MHz),   // 25MHz main clock
+    .clk_out2(clk_50MHz),   // 25MHz main clock
     .locked(w_internal_reset),
     .reset(btnC)
 );
@@ -136,10 +141,12 @@ effect_controler #(
 ) effect_controler (
     .reset(w_reset),                    // asynchronous active high reset
     .mclk(master_clk),
-    .sw(sw),
-    .clk(clk_25MHz),
+    .sw(sw[1:0]),
+    .clk(clk_50MHz),
     .i_l_data(l_data_rx),               // left channel data received         
     .i_r_data(r_data_rx),               // right channel data received
+    // .i_l_data({sw[15:2], 10'b0 }),               // left channel data received         
+    // .i_r_data({sw[15:2], 10'b0 }),               // right channel data received
     .o_l_data(l_data_tx),               // left channel data to transmit
     .o_r_data(r_data_tx),               // right channel data to transmit
     .o_read_done(w_read_done_eff),      // read done from effects controler
@@ -159,9 +166,10 @@ effect_controler #(
 effect_module #(
     .d_width(memory_d_width)                    // data width
 ) effect_module (
-    .clk(clk_25MHz),
+    .clk(clk_50MHz),
     .reset(w_reset),
-    .sw(sw),                                    // effect control swiches
+    .sw(sw[1:0]),                               // effect control swiches
+    .i_treshhold(sw[15:2]),
     .i_data_ready(w_dv_to_eff),                 // data ready to read
     .i_read_done(w_read_done_eff),              // read done from effects controler
     .i_data(w_data_to_eff),                     // data input form effect controler

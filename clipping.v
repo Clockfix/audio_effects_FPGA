@@ -20,8 +20,8 @@ localparam [2:0]        IDLE         = 'd0,
 reg [2:0] r_state=IDLE, r_next=IDLE;
 
 reg   signed      [data_width-1: 0]     r_data = 'b0;
-reg   signed      [data_width-1: 0]     r_treshhold_p = 'b0;
-reg   signed      [data_width-1: 0]     r_treshhold_n = 'b0;
+reg         [data_width-1: 0]     r_treshhold_p = 'b0;
+reg         [data_width-1: 0]     r_treshhold_n = 'b0;
 reg                                     r_read_enable = 0;
 reg                                     r_data_valid = 0;
 
@@ -52,7 +52,7 @@ always @(posedge clk ) begin
                             r_next <= CLIP;
                             r_data <= i_data;
                             r_treshhold_p <= i_treshhold;
-                            r_treshhold_n <= 0 - i_treshhold;
+                            r_treshhold_n <= (~i_treshhold) + 1; // two compliment
                             r_read_enable <= 0;
                             r_data_valid <= 0;
                         end
@@ -63,7 +63,7 @@ always @(posedge clk ) begin
                         end                     
                     end
         CLIP    :   begin
-                        case (r_data < 0 ) 
+                        case (r_data[data_width-1]) 
                             0   :   begin           // positive number
                                         if (r_data > r_treshhold_p)
                                             r_data <= r_treshhold_p;

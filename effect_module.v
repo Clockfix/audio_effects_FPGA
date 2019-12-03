@@ -3,7 +3,8 @@ module effect_module #( parameter
 )(
     input                               clk,
     input                               reset,
-    input               [1:0]           sw,             // effect control swiches
+    input               [1:0]           sw,             // effect control switches
+    input               [13:0]          i_treshhold,      // treshhold from switches
     input                               i_data_ready,   // data ready to read
     input   signed      [d_width-1: 0]  i_data,         // data input form effect controler
     input                               i_read_done,    // read done from effects controler
@@ -59,7 +60,7 @@ clipping_effect #(
 ) clipping_effect (
     .clk(clk),
     .reset(reset),
-    .i_treshhold(16'h00f0),
+    .i_treshhold( {i_treshhold, 2'b00} ),
     .i_data(i_data),
     .i_read_done(i_read_done),         // read done from effects controler
     .i_data_ready(i_data_ready),
