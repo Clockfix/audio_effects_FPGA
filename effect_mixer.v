@@ -60,7 +60,7 @@ always @(posedge clk ) begin
                             r_next <= ADD;
                             r_data_sw0 <= i_data_from_eff_sw0;
                             r_data_sw1 <= i_data_from_eff_sw1;
-
+                            r_data_norm <= 'b0;
                             r_read_done <= 1;
                             r_read_ready <= 0;
                             r_data_valid <= 0;
