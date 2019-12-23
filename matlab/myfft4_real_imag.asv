@@ -1,6 +1,3 @@
-%% If need working only with Real and Imginary parts Comment lines started 
-% with "Stage" lines: 101, 113, 117 and on the bottom whole figure(5)
-
 %% FFT algoritm
 clear;                      % clears all previus values from memory 
 clc;                        % clear command window
