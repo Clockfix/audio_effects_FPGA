@@ -154,7 +154,7 @@ end
 %% Ploting out
 % slowly plot result
 figure(5)
-for i = 1 : bits 
+for i = 1 : bits +1
     %plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );
     plot( abs( stage(i,:) ) );
     pause(1);
