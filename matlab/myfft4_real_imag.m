@@ -1,12 +1,19 @@
 %% If need working only with Real and Imginary parts Comment lines started 
-% with "Stage" lines: 101, 113, 117 and on the bottom whole figure(5)
+% with "Stage" in "New Stages" part and on the bottom whole figure(5)
 
 %% FFT algoritm
 clear;                      % clears all previus values from memory 
 clc;                        % clear command window
 fs =  44100;                % samplinf freq.
-fftLength=128;              % windowlength 
+fftLength=256;              % windowlength 
 stage_num = log2(fftLength);
+
+while 1                     % Checking for correct "fftLength"-Wondow length value
+if ~mod(stage_num,1)==0
+    error('"fftLength"-Wondow length value must be a numer: 2^x= : 2, 4, 8, 16, 32,...');
+    break
+else
+                            % continue working if value is correct
 % signal frequencies
 max = 2048 - 1 ;
 
@@ -24,15 +31,11 @@ comp1 = a1 * sin(2*pi*f1*[0:1/fs:1]);
 comp2 = a2 * sin(2*pi*f2*[0:1/fs:1]);
 comp3 = a3 * sin(2*pi*f3*[0:1/fs:1]);
 Length = length(comp3);
-% calculatin vector values for step function
-d1 = ones(1, 24);
-d2 = 0.*ones(1, 1000 );
 
-%data = [ d1 , d2];                  % creates vector with step function
 data = comp1 + comp2 + comp3;      % creates vector from 3 sin functions
 %data = comp3;
 
-% Grafika nobiides
+% Plot shifting to center
 bin_vals = [0 : fftLength-1];
 N_2 = ceil(fftLength/2);
 fax_kHz = (bin_vals-N_2)*fs/fftLength/1000;
@@ -44,28 +47,26 @@ hold off,
 %plot ( comp1, '-');
 hold on;
 %plot ( comp2, '-');
-plot ( comp3, '-'), grid minor,;
-%xlim([1 50])
+plot (comp3, '-'), grid minor,;
 title('Separete SIN functions') 
 ylabel('magnitude'), xlabel('time') 
 hold off;
 
 figure(2)               % plots signal for fft
-plot ( data), grid minor,;
+plot (data), grid minor,;
 xlim([1 50])
 title('Signal for FFT analysis FFT') 
 ylabel('magnitude'), xlabel('time') 
-%xlim([1 100])
 
 figure(3)               % plots resultinf fft from Matlab functions
-ft =fft(data,fftLength); 
+ft = fft(data,fftLength); 
 ft1 = fftshift(ft);
 ftMag = abs(ft1); 
 plot (fax_kHz,ftMag), grid minor,
 title('Linear Magnitude FFT') 
 ylabel('magnitude'), xlabel('kHz') 
 
-figure(4)               % plots resultinf fft(in dB)  from Matlab functions
+figure(4)               % plots resultinf fft(in dB) from Matlab functions
 ft = fft(data,fftLength+1); 
 ftMag = abs(ft(1:fftLength+1)); 
 plot (freq3,20*log10(ftMag)), grid minor,
@@ -83,20 +84,16 @@ c = 0:fftLength-1;
 c_bin = de2bi(c);       % create binary table
 rev_bit_dec = bi2de(fliplr(circshift(c_bin',stage-1)'));    %Rotate binary table and convert to dec
 
-%  creating array
-%  create empty array to store values in reverse bit order
+%  creating matrix arrays
+%  create empty matrix arrays to store values in reverse bit order
 stage = zeros(bits+1,fftLength);
 real_n = zeros(bits+1,fftLength);
 imag_n = zeros(bits+1,fftLength);
 
-Wn = zeros(1,fftLength/2);   % complex
-%Wr = zeros(1,fftLength/2);    % real
-%Wi = zeros(1,fftLength/2);    % imag
-%
-% Wr_sfi = zeros(1,fftLength/2);
-% Wi_sfi = zeros(1,fftLength/2);
+real_n_sfi = zeros(bits+1,fftLength);
+imag_n_sfi = zeros(bits+1,fftLength);
 
-%% New stages
+%% Starting stages
 
 for st = 0 : stage_num;
     if st == 0
@@ -107,8 +104,8 @@ for st = 0 : stage_num;
     else st > 0;
         for n = 1 : fftLength/2;
                 Wn(n)  = exp(-j * (n-1) * 2 * pi/ 2^(st) );
-                Wr(n) = real(Wn(n));%sfi(real(Wn(n)),16,15);%
-                Wi(n) = imag(Wn(n));%sfi(imag(Wn(n)),16,15);%
+                Wr(n) = real(Wn(n));
+                Wi(n) = imag(Wn(n));
         end
         for i = 1 : 2^st : fftLength;
                 for k = 0 : 2^(st-1)-1;
@@ -125,31 +122,40 @@ for st = 0 : stage_num;
     end
 end
 
-% for n = 1 : fftLength/2;
-%     Wr_sfi(n) = sfi(real(Wn(n)),16,15);
-%     Wi_sfi(n) = sfi(imag(Wn(n)),16,15);
-% end
+%% Constructing signed fixed-point numeric objects
 
-%% Ploting out
-% slowly plot result
+ for n = 1 : fftLength/2;
+     Wr_sfi(n) = sfi(real(Wn(n)),16);
+     Wi_sfi(n) = sfi(imag(Wn(n)),16);
+ end
+
+  for n = 1 : fftLength;
+      for k = 1 : st + 1
+        real_n_sfi(k,n) = sfi(real_n(k,n),24);
+        imag_n_sfi(k,n) = sfi(imag_n(k,n),24);
+      end
+  end
+ 
+%% Plotting out
+
+% for slowly result plotting uncomment pause
+
 figure(5)
 for i = 1 : bits + 1;
-    %plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );
-    %plot( fax_kHz, abs( fftshift( real_n(i, :) + j.*imag_n(i,:) ) ) ), grid minor,;
-    plot( fax_kHz, abs( fftshift( stage(i,:) ) ) ), grid minor,;
+    %plot( fax_kHz, abs( fftshift( real_n(i, :) + j.*imag_n(i,:) ) ) ),
+    plot( fax_kHz, abs( fftshift( stage(i,:) ) ) ),
+    grid minor, title('Linear Magnitude FFT'), ylabel('magnitude'), xlabel('kHz');
     %pause(1);
 end
 
-title('Linear Magnitude FFT') 
-ylabel('magnitude'), xlabel('kHz')
-
 figure(6)
 for i = 1 : bits + 1;
-    %plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );
-    plot( fax_kHz, abs( fftshift( real_n(i, :) + j.*imag_n(i,:) ) ) ), grid minor,;
+    plot( fax_kHz, abs( fftshift( real_n(i, :) + j.*imag_n(i,:) ) ) ),
+    grid minor, title('Linear Magnitude FFT, ploted from Real + Imag'), ylabel('magnitude'), xlabel('kHz');
     %plot( fax_kHz, abs( fftshift( stage(i,:) ) ) ), grid minor,;
     %pause(1);
 end
 
-title('Linear Magnitude FFT, ploted from Real + Imag') 
-ylabel('magnitude'), xlabel('kHz') 
+break
+end
+end
