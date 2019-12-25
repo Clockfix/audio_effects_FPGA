@@ -5,7 +5,7 @@
 clear;                      % clears all previus values from memory 
 clc;                        % clear command window
 fs =  44100;                % samplinf freq.
-fftLength=512;              % windowlength 
+fftLength=128;              % windowlength 
 stage_num = log2(fftLength);
 % signal frequencies
 max = 2048 - 1 ;
@@ -90,8 +90,11 @@ real_n = zeros(bits+1,fftLength);
 imag_n = zeros(bits+1,fftLength);
 
 Wn = zeros(1,fftLength/2);   % complex
-Wr = zeros(1,fftLength/2);    % real
-Wi = zeros(1,fftLength/2);    % imag
+%Wr = zeros(1,fftLength/2);    % real
+%Wi = zeros(1,fftLength/2);    % imag
+%
+% Wr_sfi = zeros(1,fftLength/2);
+% Wi_sfi = zeros(1,fftLength/2);
 
 %% New stages
 
@@ -104,23 +107,28 @@ for st = 0 : stage_num;
     else st > 0;
         for n = 1 : fftLength/2;
                 Wn(n)  = exp(-j * (n-1) * 2 * pi/ 2^(st) );
-                Wr(n) = real(Wn(n));
-                Wi(n) = imag(Wn(n));
+                Wr(n) = real(Wn(n));%sfi(real(Wn(n)),16,15);%
+                Wi(n) = imag(Wn(n));%sfi(imag(Wn(n)),16,15);%
         end
         for i = 1 : 2^st : fftLength;
                 for k = 0 : 2^(st-1)-1;
                     % Even
                         stage(st+1,i+k) = stage(st,i+k) + Wn(k+1)*stage(st,i+k+2^(st-1));
-                        real_n(st+1,i+k) = real_n(st,i+k) + Wn(k+1)*real_n(st,i+k+2^(st-1));
-                        imag_n(st+1,i+k) = imag_n(st,i+k) + Wn(k+1)*imag_n(st,i+k+2^(st-1));
+                        real_n(st+1,i+k) = real_n(st,i+k) + Wr(k+1)*real_n(st,i+k+2^(st-1)) - Wi(k+1)*imag_n(st,i+k+2^(st-1));
+                        imag_n(st+1,i+k) = imag_n(st,i+k) + Wi(k+1)*real_n(st,i+k+2^(st-1)) + + Wr(k+1)*imag_n(st,i+k+2^(st-1));
                     % Odd
                         stage(st+1,i+k+2^(st-1)) = stage(st,i+k) - Wn(k+1)*stage(st,i+k+2^(st-1));
-                        real_n(st+1,i+k+2^(st-1)) = real_n(st,i+k) - Wn(k+1)*real_n(st,i+k+2^(st-1));
-                        imag_n(st+1,i+k+2^(st-1)) = imag_n(st,i+k) - Wn(k+1)*imag_n(st,i+k+2^(st-1));
+                        real_n(st+1,i+k+2^(st-1)) = real_n(st,i+k) - Wr(k+1)*real_n(st,i+k+2^(st-1)) +  Wi(k+1)*imag_n(st,i+k+2^(st-1));
+                        imag_n(st+1,i+k+2^(st-1)) = imag_n(st,i+k) - Wi(k+1)*real_n(st,i+k+2^(st-1)) - Wr(k+1)*imag_n(st,i+k+2^(st-1));
                 end
         end
     end
 end
+
+% for n = 1 : fftLength/2;
+%     Wr_sfi(n) = sfi(real(Wn(n)),16,15);
+%     Wi_sfi(n) = sfi(imag(Wn(n)),16,15);
+% end
 
 %% Ploting out
 % slowly plot result
