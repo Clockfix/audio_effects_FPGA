@@ -1,0 +1,659 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>myfft3</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-12-27"><meta name="DC.source" content="myfft3.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">FFT algoritm</a></li><li><a href="#2">Data preparation for FFT</a></li><li><a href="#3">First stage</a></li><li><a href="#4">Second stage</a></li><li><a href="#5">Therd stage</a></li><li><a href="#6">4th stage</a></li><li><a href="#7">5th stage</a></li><li><a href="#8">Ploting out</a></li></ul></div><h2 id="1">FFT algoritm</h2><pre class="codeinput">clear;                      <span class="comment">% clears all previus values from memory</span>
+clc;                        <span class="comment">% clear command window</span>
+fs =  44100;                <span class="comment">% samplinf freq.</span>
+fftLength=32;               <span class="comment">% windowlength</span>
+
+<span class="comment">% signal frequencies</span>
+data_length = 8;           <span class="comment">% data length in FPGA calculations</span>
+max = 2^(data_length-1) - 1 ;            <span class="comment">% max aplitude 2^n  /2</span>
+
+f1 = 1000;
+a1 = max/2;
+
+f2 = 0;
+a2 = max/4;
+
+f3 = 8000;
+a3 = max/2;
+
+<span class="comment">% calculating signals</span>
+comp1 = a1 * cos(2*pi*f1*[0:1/fs:1]);
+comp2 = a2 * cos(2*pi*f2*[0:1/fs:1]);
+comp3 = a3 * cos(2*pi*f3*[0:1/fs:1]);
+
+<span class="comment">% calculatin vector values for step function</span>
+d1 = ones(1, 24);
+d2 = 0.*ones(1, 1000 );
+
+<span class="comment">%data = [ d1 , d2];                  % creates vector with step function</span>
+data = comp1 + comp2 + comp3;      <span class="comment">% creates vector from 3 sin functions</span>
+
+figure(1)               <span class="comment">% plots separete sin functions</span>
+plot ( comp1, <span class="string">'-'</span>);
+hold <span class="string">on</span>;
+plot ( comp2, <span class="string">'-'</span>);
+plot ( comp3, <span class="string">'-'</span>);
+xlim([1 50])
+title(<span class="string">'Separete SIN functions'</span>)
+ylabel(<span class="string">'magnitude'</span>), xlabel(<span class="string">'time'</span>)
+hold <span class="string">off</span>;
+
+figure(2)               <span class="comment">% plots signal for fft</span>
+plot ( data);
+title(<span class="string">'Signal for FFT analysis FFT'</span>)
+ylabel(<span class="string">'magnitude'</span>), xlabel(<span class="string">'time'</span>)
+xlim([1 100])
+
+figure(3)               <span class="comment">% plots resultinf fft from Matlab functions</span>
+ft =fft(data,fftLength);
+ftMag=abs(ft(1:fftLength/2));
+stem (ftMag)
+title(<span class="string">'Linear Magnitude FFT'</span>)
+ylabel(<span class="string">'magnitude'</span>), xlabel(<span class="string">'kHz'</span>)
+
+xt = xticks;        <span class="comment">% returns the current x-axis tick values as a vector</span>
+fstep = fs/fftLength;       <span class="comment">% tick of f axis in f domain</span>
+xtnew = round((xt-1)*fstep/1000, 1) ;   <span class="comment">% calculate new tick in kHz</span>
+xticklabels(xtnew)      <span class="comment">% set new tick labels</span>
+
+<span class="comment">% figure(4)               % plots resultinf fft(in dB)  from Matlab functions</span>
+<span class="comment">% ft =fft(data,fftLength);</span>
+<span class="comment">% ftMag=abs(ft(1:fftLength/2));</span>
+<span class="comment">% plot (20*log10(ftMag))</span>
+<span class="comment">% title('dB Magnitude')</span>
+<span class="comment">% ylabel('dB'), xlabel('kHz')</span>
+<span class="comment">%</span>
+<span class="comment">% xt = xticks;        % returns the current x-axis tick values as a vector</span>
+<span class="comment">% fstep = fs/fftLength;       % tick of f axis in f domain</span>
+<span class="comment">% xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz</span>
+<span class="comment">% xticklabels(xtnew)      % set new tick labels</span>
+</pre><img vspace="5" hspace="5" src="myfft3_01.png" alt=""> <img vspace="5" hspace="5" src="myfft3_02.png" alt=""> <img vspace="5" hspace="5" src="myfft3_03.png" alt=""> <h2 id="2">Data preparation for FFT</h2><pre class="codeinput"><span class="comment">% reverse bit calulation</span>
+bits = length(dec2bin( fftLength - 1 ));    <span class="comment">% how many bits in binary number</span>
+rev_bit_dec = zeros(1,fftLength);           <span class="comment">% create vektor size of fftlength</span>
+
+<span class="keyword">for</span> n=1:fftLength
+    bin_num = dec2bin(n-1 , bits);          <span class="comment">% converting to binary number</span>
+    rev_bit = [];                           <span class="comment">% create empty vector</span>
+    <span class="keyword">for</span> k=bits:-1:1
+       rev_bit = [rev_bit , bin_num(k)];
+    <span class="keyword">end</span>
+    rev_bit_dec(n) = bin2dec(rev_bit) ;     <span class="comment">% add 1 to match Matlab numbering</span>
+<span class="keyword">end</span>
+
+<span class="comment">%  creating array</span>
+<span class="comment">%  create empty array to store values in reverse bit order</span>
+stage = zeros(bits + 1,fftLength);
+
+<span class="keyword">for</span> n=1:fftLength
+     stage(1,n)  =  data(rev_bit_dec(n)+1);
+<span class="keyword">end</span>
+
+<span class="comment">% Calculating W twiddling factor for all stages</span>
+<span class="keyword">for</span> n = 1 : fftLength/2
+    W(n)  = exp(-1i * (n-1) * 2 * pi/ fftLength );
+<span class="keyword">end</span>
+
+<span class="comment">% convert to fixed point mumber -&gt; sfi(v,w,f) returns a signed fixed-point object with value v, word length w, and fraction length f.</span>
+Wr = sfi(real(W),data_length,data_length-2);
+Wi = sfi(imag(W),data_length,data_length-2);
+
+st_real = sfi(real(stage) , data_length + 3 , 0);
+st_imag = sfi(imag(stage) , data_length + 3 , 0);
+<span class="comment">% temp values for multiplaying with W twiddling factor</span>
+st_real_tmp = sfi(real(zeros(bits + 1,fftLength)) , data_length + 3 , 0);
+st_imag_tmp = sfi(imag(zeros(bits + 1,fftLength)) , data_length + 3 , 0);
+</pre><h2 id="3">First stage</h2><pre class="codeinput"><span class="keyword">for</span> n = 1 : 2^1 : fftLength
+    <span class="comment">% Even</span>
+    stage(2,n)    = stage(1,n) + stage(1,n+1);
+    <span class="comment">% Odd</span>
+    stage(2,n+1)  = stage(1,n) - stage(1,n+1);
+<span class="keyword">end</span>
+
+<span class="comment">% calculations using separate real and imaginary numbers</span>
+<span class="keyword">for</span> n = 1 : 2^1 : fftLength
+    <span class="comment">% Even</span>
+    st_real(2,n)    = st_real(1,n) + st_real(1,n+1);
+    <span class="comment">% imag is 0</span>
+    <span class="comment">% Odd</span>
+    st_real(2,n+1)  = st_real(1,n) - st_real(1,n+1);
+    <span class="comment">% imag is 0</span>
+<span class="keyword">end</span>
+</pre><h2 id="4">Second stage</h2><pre class="codeinput"><span class="comment">% Calculating W twiddling factor</span>
+<span class="keyword">for</span> n = 1 : 2
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 4 );
+<span class="keyword">end</span>
+
+<span class="comment">% calculate next stage values</span>
+<span class="keyword">for</span> n = 1 : 2^2 : fftLength
+    <span class="comment">% Even pair</span>
+        stage(3,n+0)   = stage(2,n+0) + Wn(1)*stage(2,n+2);
+        stage(3,n+1)   = stage(2,n+1) + Wn(2)*stage(2,n+3);
+    <span class="comment">% Odd par</span>
+        stage(3,n+2)   = stage(2,n+0) - Wn(1)*stage(2,n+2);
+        stage(3,n+3)   = stage(2,n+1) - Wn(2)*stage(2,n+3);
+<span class="keyword">end</span>
+
+<span class="comment">% calculations using separate real and imaginary numbers</span>
+<span class="keyword">for</span> n = 1 : 2^2 : fftLength
+    <span class="comment">% Even pair</span>
+        st_real(3,n+0)   = st_real(2,n+0) + st_real(2,n+2);
+        <span class="comment">% imag is 0</span>
+        st_real(3,n+1)   = st_real(2,n+1) ;         <span class="comment">% real is 0</span>
+        st_imag(3,n+1)   = -1 * st_real(2,n+3);     <span class="comment">% mult -j</span>
+    <span class="comment">% Odd par</span>
+        st_real(3,n+2)   = st_real(2,n+0) - st_real(2,n+2);
+        <span class="comment">% imag is 0</span>
+        st_real(3,n+3)   = st_real(2,n+1) ;         <span class="comment">% real is 0</span>
+        st_imag(3,n+3)   = st_real(2,n+3);          <span class="comment">% mult -j</span>
+<span class="keyword">end</span>
+</pre><h2 id="5">Therd stage</h2><pre class="codeinput"><span class="comment">% Calculating W twiddling factor</span>
+<span class="keyword">for</span> n = 1 : 4
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 8 );
+<span class="keyword">end</span>
+
+<span class="comment">% calculate next stage values</span>
+<span class="keyword">for</span> n = 1 : 2^3 : fftLength
+    <span class="keyword">for</span> k = 0 : 3
+        <span class="comment">% Even pair</span>
+        stage(4,n+k)   = stage(3,n+k) + Wn(k+1)*stage(3,n+k+4);
+        <span class="comment">% Odd par</span>
+        stage(4,n+k+4) = stage(3,n+k) - Wn(k+1)*stage(3,n+k+4);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% calculations using separate real and imaginary numbers</span>
+<span class="keyword">for</span> n = 1 : 2^3 : fftLength
+    <span class="keyword">for</span> k = 0 : 3
+        st_real_tmp(3,n+k+4) = ( Wr(k*4+1) * st_real(3,n+k+4) ) - (  Wi(k*4+1) * st_imag(3,n+k+4) );
+        st_imag_tmp(3,n+k+4) = ( Wi(k*4+1) * st_real(3,n+k+4) ) + (  Wr(k*4+1) * st_imag(3,n+k+4) );
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> n = 1 : 2^3 : fftLength
+    <span class="keyword">for</span> k = 0 : 3
+        <span class="comment">% Even pair</span>
+        st_real(4,n+k)   = st_real(3,n+k) + st_real_tmp(3,n+k+4);
+        st_imag(4,n+k)   = st_imag(3,n+k) + st_imag_tmp(3,n+k+4);
+        <span class="comment">% Odd par</span>
+        st_real(4,n+k+4) = st_real(3,n+k) - st_real_tmp(3,n+k+4);
+        st_imag(4,n+k+4) = st_imag(3,n+k) - st_imag_tmp(3,n+k+4);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="6">4th stage</h2><pre class="codeinput"><span class="comment">% Calculating W twiddling factor</span>
+<span class="keyword">for</span> n = 1 : 8
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 16 );
+<span class="keyword">end</span>
+
+<span class="comment">% calculate next stage values</span>
+<span class="keyword">for</span> n = 1 : 2^4 : fftLength
+    <span class="keyword">for</span> k = 0 : 7
+        <span class="comment">% Even pair</span>
+        stage(5,n+k)    = stage(4,n+k) + Wn(k+1)*stage(4,n+k+8);
+        <span class="comment">% Odd par</span>
+        stage(5,n+k+8)  = stage(4,n+k) - Wn(k+1)*stage(4,n+k+8);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% calculations using separate real and imaginary numbers</span>
+<span class="keyword">for</span> n = 1 : 2^4 : fftLength
+    <span class="keyword">for</span> k = 0 : 7
+         st_real_tmp(4,n+k+8) = ( Wr(k*2+1) * st_real(4,n+k+8) ) - (  Wi(k*2+1) * st_imag(4,n+k+8) );
+         st_imag_tmp(4,n+k+8) = ( Wi(k*2+1) * st_real(4,n+k+8) ) + (  Wr(k*2+1) * st_imag(4,n+k+8) );
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> n = 1 : 2^4 : fftLength
+    <span class="keyword">for</span> k = 0 : 7
+        <span class="comment">% Even pair</span>
+        st_real(5,n+k)    = st_real(4,n+k) + st_real_tmp(4,n+k+8);
+        st_imag(5,n+k)    = st_imag(4,n+k) + st_imag_tmp(4,n+k+8);
+        <span class="comment">% Odd par</span>
+        st_real(5,n+k+8)  = st_real(4,n+k) - st_real_tmp(4,n+k+8);
+        st_imag(5,n+k+8)  = st_imag(4,n+k) - st_imag_tmp(4,n+k+8);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="7">5th stage</h2><pre class="codeinput"><span class="comment">% Calculating W twiddling factor</span>
+<span class="keyword">for</span> n = 1 : 16
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 32 );
+<span class="keyword">end</span>
+
+<span class="comment">% calculate next stage values</span>
+<span class="keyword">for</span> n = 1 : 2^5 : fftLength
+    <span class="keyword">for</span> k = 0 : 15
+        <span class="comment">% Even pair</span>
+        stage(6,n+k)    = stage(5,n+k) + Wn(k+1)*stage(5,n+k+16);
+        <span class="comment">% Odd par</span>
+        stage(6,n+k+16)  = stage(5,n+k) - Wn(k+1)*stage(5,n+k+16);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% calculations using separate real and imaginary numbers</span>
+<span class="keyword">for</span> n = 1 : 2^5 : fftLength
+    <span class="keyword">for</span> k = 0 : 15
+         st_real_tmp(5,n+k+16) = ( Wr(k*1+1) * st_real(5,n+k+16) ) - (  Wi(k*1+1) * st_imag(5,n+k+16) );
+         st_imag_tmp(5,n+k+16) = ( Wi(k*1+1) * st_real(5,n+k+16) ) + (  Wr(k*1+1) * st_imag(5,n+k+16) );
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> n = 1 : 2^5 : fftLength
+    <span class="keyword">for</span> k = 0 : 15
+        <span class="comment">% Even pair</span>
+        st_real(6,n+k)    = st_real(5,n+k) + st_real_tmp(5,n+k+16);
+        st_imag(6,n+k)    = st_imag(5,n+k) + st_imag_tmp(5,n+k+16);
+        <span class="comment">% Odd par</span>
+        st_real(6,n+k+16)  = st_real(5,n+k) - st_real_tmp(5,n+k+16);
+        st_imag(6,n+k+16)  = st_imag(5,n+k) - st_imag_tmp(5,n+k+16);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2 id="8">Ploting out</h2><p>slowly plot result</p><pre class="codeinput">figure(5)
+<span class="keyword">for</span> n = 1 : bits +1
+    <span class="comment">%plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );</span>
+    stem( abs( stage(n,1:fftLength/2) ) );
+<span class="comment">%     pause(1);</span>
+<span class="keyword">end</span>
+xt = xticks;        <span class="comment">% returns the current x-axis tick values as a vector</span>
+fstep = fs/fftLength;       <span class="comment">% tick of f axis in f domain</span>
+xtnew = round((xt-1)*fstep/1000, 1) ;   <span class="comment">% calculate new tick in kHz</span>
+xticklabels(xtnew)      <span class="comment">% set new tick labels</span>
+title(<span class="string">'FFT using custom function'</span>)
+ylabel(<span class="string">'magnitude'</span>), xlabel(<span class="string">'kHz'</span>)
+
+figure(6)
+<span class="keyword">for</span> n = 1 : bits +1
+    <span class="comment">%plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );</span>
+    temp = st_real + 1i * st_imag;
+    stem( abs( temp(n,1:fftLength/2) ) );
+<span class="comment">%      pause(1);</span>
+<span class="keyword">end</span>
+xt = xticks;        <span class="comment">% returns the current x-axis tick values as a vector</span>
+fstep = fs/fftLength;       <span class="comment">% tick of f axis in f domain</span>
+xtnew = round((xt-1)*fstep/1000, 1) ;   <span class="comment">% calculate new tick in kHz</span>
+xticklabels(xtnew)      <span class="comment">% set new tick labels</span>
+title(<span class="string">'FFT using custom function real/imag separate'</span>)
+ylabel(<span class="string">'magnitude'</span>), xlabel(<span class="string">'kHz'</span>)
+
+figure(7)
+dif2 = 100* abs(temp(bits +1,1:fftLength/2) - ft(1:fftLength/2))./abs(ft(1:fftLength/2)) ;
+plot(dif2, <span class="string">'blue'</span>)
+title(<span class="string">'Difference in calculations'</span>)
+xt = xticks;        <span class="comment">% returns the current x-axis tick values as a vector</span>
+fstep = fs/fftLength;       <span class="comment">% tick of f axis in f domain</span>
+xtnew = round((xt-1)*fstep/1000, 1) ;   <span class="comment">% calculate new tick in kHz</span>
+xticklabels(xtnew)      <span class="comment">% set new tick labels</span>
+ylabel(<span class="string">'percents, %'</span>), xlabel(<span class="string">'kHz'</span>)
+</pre><img vspace="5" hspace="5" src="myfft3_04.png" alt=""> <img vspace="5" hspace="5" src="myfft3_05.png" alt=""> <img vspace="5" hspace="5" src="myfft3_06.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% FFT algoritm
+clear;                      % clears all previus values from memory 
+clc;                        % clear command window
+fs =  44100;                % samplinf freq.
+fftLength=32;               % windowlength 
+
+% signal frequencies
+data_length = 8;           % data length in FPGA calculations 
+max = 2^(data_length-1) - 1 ;            % max aplitude 2^n  /2 
+
+f1 = 1000;
+a1 = max/2;
+
+f2 = 0;
+a2 = max/4;
+
+f3 = 8000;
+a3 = max/2;
+
+% calculating signals 
+comp1 = a1 * cos(2*pi*f1*[0:1/fs:1]);
+comp2 = a2 * cos(2*pi*f2*[0:1/fs:1]);
+comp3 = a3 * cos(2*pi*f3*[0:1/fs:1]);
+
+% calculatin vector values for step function
+d1 = ones(1, 24);
+d2 = 0.*ones(1, 1000 );
+
+%data = [ d1 , d2];                  % creates vector with step function
+data = comp1 + comp2 + comp3;      % creates vector from 3 sin functions
+
+figure(1)               % plots separete sin functions
+plot ( comp1, '-');
+hold on;
+plot ( comp2, '-');
+plot ( comp3, '-');
+xlim([1 50])
+title('Separete SIN functions') 
+ylabel('magnitude'), xlabel('time') 
+hold off;
+
+figure(2)               % plots signal for fft
+plot ( data);
+title('Signal for FFT analysis FFT') 
+ylabel('magnitude'), xlabel('time') 
+xlim([1 100])
+
+figure(3)               % plots resultinf fft from Matlab functions
+ft =fft(data,fftLength); 
+ftMag=abs(ft(1:fftLength/2)); 
+stem (ftMag)
+title('Linear Magnitude FFT') 
+ylabel('magnitude'), xlabel('kHz') 
+
+xt = xticks;        % returns the current x-axis tick values as a vector
+fstep = fs/fftLength;       % tick of f axis in f domain 
+xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz
+xticklabels(xtnew)      % set new tick labels
+
+% figure(4)               % plots resultinf fft(in dB)  from Matlab functions
+% ft =fft(data,fftLength); 
+% ftMag=abs(ft(1:fftLength/2)); 
+% plot (20*log10(ftMag))
+% title('dB Magnitude') 
+% ylabel('dB'), xlabel('kHz') 
+% 
+% xt = xticks;        % returns the current x-axis tick values as a vector
+% fstep = fs/fftLength;       % tick of f axis in f domain 
+% xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz
+% xticklabels(xtnew)      % set new tick labels
+
+%% Data preparation for FFT
+
+% reverse bit calulation
+bits = length(dec2bin( fftLength - 1 ));    % how many bits in binary number
+rev_bit_dec = zeros(1,fftLength);           % create vektor size of fftlength
+
+for n=1:fftLength
+    bin_num = dec2bin(n-1 , bits);          % converting to binary number
+    rev_bit = [];                           % create empty vector
+    for k=bits:-1:1
+       rev_bit = [rev_bit , bin_num(k)];
+    end
+    rev_bit_dec(n) = bin2dec(rev_bit) ;     % add 1 to match Matlab numbering   
+end
+
+%  creating array
+%  create empty array to store values in reverse bit order
+stage = zeros(bits + 1,fftLength);
+
+for n=1:fftLength
+     stage(1,n)  =  data(rev_bit_dec(n)+1);
+end
+
+% Calculating W twiddling factor for all stages 
+for n = 1 : fftLength/2 
+    W(n)  = exp(-1i * (n-1) * 2 * pi/ fftLength );
+end
+
+% convert to fixed point mumber -> sfi(v,w,f) returns a signed fixed-point object with value v, word length w, and fraction length f.
+Wr = sfi(real(W),data_length,data_length-2);       
+Wi = sfi(imag(W),data_length,data_length-2);
+
+st_real = sfi(real(stage) , data_length + 3 , 0);
+st_imag = sfi(imag(stage) , data_length + 3 , 0);
+% temp values for multiplaying with W twiddling factor
+st_real_tmp = sfi(real(zeros(bits + 1,fftLength)) , data_length + 3 , 0);
+st_imag_tmp = sfi(imag(zeros(bits + 1,fftLength)) , data_length + 3 , 0);
+
+%% First stage
+
+for n = 1 : 2^1 : fftLength 
+    % Even
+    stage(2,n)    = stage(1,n) + stage(1,n+1);
+    % Odd
+    stage(2,n+1)  = stage(1,n) - stage(1,n+1);
+end
+
+% calculations using separate real and imaginary numbers 
+for n = 1 : 2^1 : fftLength 
+    % Even
+    st_real(2,n)    = st_real(1,n) + st_real(1,n+1);
+    % imag is 0
+    % Odd
+    st_real(2,n+1)  = st_real(1,n) - st_real(1,n+1);
+    % imag is 0
+end
+
+%% Second stage
+
+% Calculating W twiddling factor 
+for n = 1 : 2 
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 4 );
+end
+
+% calculate next stage values
+for n = 1 : 2^2 : fftLength 
+    % Even pair
+        stage(3,n+0)   = stage(2,n+0) + Wn(1)*stage(2,n+2); 
+        stage(3,n+1)   = stage(2,n+1) + Wn(2)*stage(2,n+3); 
+    % Odd par
+        stage(3,n+2)   = stage(2,n+0) - Wn(1)*stage(2,n+2); 
+        stage(3,n+3)   = stage(2,n+1) - Wn(2)*stage(2,n+3); 
+end
+
+% calculations using separate real and imaginary numbers  
+for n = 1 : 2^2 : fftLength 
+    % Even pair
+        st_real(3,n+0)   = st_real(2,n+0) + st_real(2,n+2); 
+        % imag is 0
+        st_real(3,n+1)   = st_real(2,n+1) ;         % real is 0
+        st_imag(3,n+1)   = -1 * st_real(2,n+3);     % mult -j
+    % Odd par
+        st_real(3,n+2)   = st_real(2,n+0) - st_real(2,n+2); 
+        % imag is 0
+        st_real(3,n+3)   = st_real(2,n+1) ;         % real is 0
+        st_imag(3,n+3)   = st_real(2,n+3);          % mult -j
+end
+
+
+%% Therd stage
+
+% Calculating W twiddling factor 
+for n = 1 : 4 
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 8 );
+end
+
+% calculate next stage values
+for n = 1 : 2^3 : fftLength 
+    for k = 0 : 3
+        % Even pair
+        stage(4,n+k)   = stage(3,n+k) + Wn(k+1)*stage(3,n+k+4);   
+        % Odd par
+        stage(4,n+k+4) = stage(3,n+k) - Wn(k+1)*stage(3,n+k+4); 
+    end
+end
+
+% calculations using separate real and imaginary numbers  
+for n = 1 : 2^3 : fftLength 
+    for k = 0 : 3
+        st_real_tmp(3,n+k+4) = ( Wr(k*4+1) * st_real(3,n+k+4) ) - (  Wi(k*4+1) * st_imag(3,n+k+4) );   
+        st_imag_tmp(3,n+k+4) = ( Wi(k*4+1) * st_real(3,n+k+4) ) + (  Wr(k*4+1) * st_imag(3,n+k+4) ); 
+    end
+end
+for n = 1 : 2^3 : fftLength 
+    for k = 0 : 3
+        % Even pair
+        st_real(4,n+k)   = st_real(3,n+k) + st_real_tmp(3,n+k+4);  
+        st_imag(4,n+k)   = st_imag(3,n+k) + st_imag_tmp(3,n+k+4);
+        % Odd par
+        st_real(4,n+k+4) = st_real(3,n+k) - st_real_tmp(3,n+k+4); 
+        st_imag(4,n+k+4) = st_imag(3,n+k) - st_imag_tmp(3,n+k+4); 
+    end
+end
+
+
+%% 4th stage  
+
+% Calculating W twiddling factor 
+for n = 1 : 8 
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 16 );
+end
+
+% calculate next stage values
+for n = 1 : 2^4 : fftLength 
+    for k = 0 : 7
+        % Even pair
+        stage(5,n+k)    = stage(4,n+k) + Wn(k+1)*stage(4,n+k+8);     
+        % Odd par
+        stage(5,n+k+8)  = stage(4,n+k) - Wn(k+1)*stage(4,n+k+8);  
+    end
+end
+
+% calculations using separate real and imaginary numbers  
+for n = 1 : 2^4 : fftLength 
+    for k = 0 : 7
+         st_real_tmp(4,n+k+8) = ( Wr(k*2+1) * st_real(4,n+k+8) ) - (  Wi(k*2+1) * st_imag(4,n+k+8) );   
+         st_imag_tmp(4,n+k+8) = ( Wi(k*2+1) * st_real(4,n+k+8) ) + (  Wr(k*2+1) * st_imag(4,n+k+8) ); 
+    end
+end
+for n = 1 : 2^4 : fftLength 
+    for k = 0 : 7
+        % Even pair
+        st_real(5,n+k)    = st_real(4,n+k) + st_real_tmp(4,n+k+8); 
+        st_imag(5,n+k)    = st_imag(4,n+k) + st_imag_tmp(4,n+k+8);
+        % Odd par
+        st_real(5,n+k+8)  = st_real(4,n+k) - st_real_tmp(4,n+k+8);
+        st_imag(5,n+k+8)  = st_imag(4,n+k) - st_imag_tmp(4,n+k+8);
+    end
+end
+
+%% 5th stage  
+
+% Calculating W twiddling factor 
+for n = 1 : 16 
+    Wn(n)  = exp(-1i * (n-1) * 2 * pi/ 32 );
+end
+
+% calculate next stage values
+for n = 1 : 2^5 : fftLength 
+    for k = 0 : 15
+        % Even pair
+        stage(6,n+k)    = stage(5,n+k) + Wn(k+1)*stage(5,n+k+16);     
+        % Odd par
+        stage(6,n+k+16)  = stage(5,n+k) - Wn(k+1)*stage(5,n+k+16);  
+    end
+end
+
+% calculations using separate real and imaginary numbers  
+for n = 1 : 2^5 : fftLength 
+    for k = 0 : 15
+         st_real_tmp(5,n+k+16) = ( Wr(k*1+1) * st_real(5,n+k+16) ) - (  Wi(k*1+1) * st_imag(5,n+k+16) );   
+         st_imag_tmp(5,n+k+16) = ( Wi(k*1+1) * st_real(5,n+k+16) ) + (  Wr(k*1+1) * st_imag(5,n+k+16) );
+    end
+end
+for n = 1 : 2^5 : fftLength 
+    for k = 0 : 15
+        % Even pair
+        st_real(6,n+k)    = st_real(5,n+k) + st_real_tmp(5,n+k+16); 
+        st_imag(6,n+k)    = st_imag(5,n+k) + st_imag_tmp(5,n+k+16); 
+        % Odd par
+        st_real(6,n+k+16)  = st_real(5,n+k) - st_real_tmp(5,n+k+16); 
+        st_imag(6,n+k+16)  = st_imag(5,n+k) - st_imag_tmp(5,n+k+16);
+    end
+end
+
+
+
+%% Ploting out
+% slowly plot result
+figure(5)
+for n = 1 : bits +1
+    %plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );
+    stem( abs( stage(n,1:fftLength/2) ) );
+%     pause(1);
+end
+xt = xticks;        % returns the current x-axis tick values as a vector
+fstep = fs/fftLength;       % tick of f axis in f domain 
+xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz
+xticklabels(xtnew)      % set new tick labels
+title('FFT using custom function') 
+ylabel('magnitude'), xlabel('kHz') 
+
+figure(6)
+for n = 1 : bits +1
+    %plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );
+    temp = st_real + 1i * st_imag;
+    stem( abs( temp(n,1:fftLength/2) ) );
+%      pause(1);
+end
+xt = xticks;        % returns the current x-axis tick values as a vector
+fstep = fs/fftLength;       % tick of f axis in f domain 
+xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz
+xticklabels(xtnew)      % set new tick labels
+title('FFT using custom function real/imag separate') 
+ylabel('magnitude'), xlabel('kHz') 
+
+figure(7)
+dif2 = 100* abs(temp(bits +1,1:fftLength/2) - ft(1:fftLength/2))./abs(ft(1:fftLength/2)) ;
+plot(dif2, 'blue')
+title('Difference in calculations') 
+xt = xticks;        % returns the current x-axis tick values as a vector
+fstep = fs/fftLength;       % tick of f axis in f domain 
+xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz
+xticklabels(xtnew)      % set new tick labels
+ylabel('percents, %'), xlabel('kHz') 
+
+##### SOURCE END #####
+--></body></html>
