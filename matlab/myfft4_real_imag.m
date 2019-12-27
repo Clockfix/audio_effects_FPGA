@@ -47,7 +47,8 @@ hold off,
 %plot ( comp1, '-');
 hold on;
 %plot ( comp2, '-');
-plot (comp3, '-'), grid minor,;
+plot (comp3, '-')
+xlim([1 50]), grid minor,;
 title('Separete SIN functions') 
 ylabel('magnitude'), xlabel('time') 
 hold off;
