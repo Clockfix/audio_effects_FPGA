@@ -2,23 +2,23 @@
 clear;                      % clears all previus values from memory 
 clc;                        % clear command window
 fs =  44100;                % samplinf freq.
-fftLength=16;              % windowlength 
+fftLength=32;              % windowlength 
 % signal frequencies
-max = 2048 - 1 ;
+max = 2048 - 1 ;        % max aplitude
 
-f1 = 430;
-a1 = 0;
+f1 = 1000;
+a1 = max/5;
 
-f2 = 4300;
-a2 = 0;
+f2 = 0;
+a2 = max/4;
 
-f3 = 8000;
+f3 = 9600;
 a3 = max/2;
 
 % calculating signals 
-comp1 = a1 * sin(2*pi*f1*[0:1/fs:1]);
-comp2 = a2 * sin(2*pi*f2*[0:1/fs:1]);
-comp3 = a3 * sin(2*pi*f3*[0:1/fs:1]);
+comp1 = a1 * cos(2*pi*f1*[0:1/fs:1]);
+comp2 = a2 * cos(2*pi*f2*[0:1/fs:1]);
+comp3 = a3 * cos(2*pi*f3*[0:1/fs:1]);
 
 % calculatin vector values for step function
 d1 = ones(1, 24);
@@ -151,15 +151,33 @@ for i = 1 : 2^4 : fftLength
     end
 end
 
+%% 5th stage  
+
+% Calculating W twiddling factor 
+for i = 1 : 16 
+    Wn(i)  = exp(-j * (i-1) * 2 * pi/ 32 );
+end
+
+% calculate next stage values
+for i = 1 : 2^5 : fftLength 
+    for k = 0 : 15
+        % Even pair
+        stage(6,i+k)    = stage(5,i+k) + Wn(k+1)*stage(5,i+k+16);     
+        % Odd par
+        stage(6,i+k+16)  = stage(5,i+k) - Wn(k+1)*stage(5,i+k+16);  
+    end
+end
+
+
 %% Ploting out
 % slowly plot result
 figure(5)
 for i = 1 : bits +1
     %plot( abs( real_n(i, :) + j.*imag_n(i,  :) ) );
-    plot( abs( stage(i,:) ) );
+    plot( abs( stage(i,1:fftLength/2) ) );
     pause(1);
 end
 xt = xticks;        % returns the current x-axis tick values as a vector
 fstep = fs/fftLength;       % tick of f axis in f domain 
-xtnew = round(xt*fstep)/1000 ;   % calculate new tick in kHz
+xtnew = round((xt-1)*fstep/1000, 1) ;   % calculate new tick in kHz
 xticklabels(xtnew)      % set new tick labels

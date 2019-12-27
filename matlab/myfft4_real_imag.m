@@ -68,9 +68,10 @@ title('Linear Magnitude FFT')
 ylabel('magnitude'), xlabel('kHz') 
 
 figure(4)               % plots resultinf fft(in dB) from Matlab functions
-ft = fft(data,fftLength+1); 
-ftMag = abs(ft(1:fftLength+1)); 
-plot (freq3,20*log10(ftMag)), grid minor,
+ft = fft(data,fftLength); 
+ft1 = fftshift(ft);
+ftMag = abs(ft1(1:fftLength)); 
+plot (fax_kHz,20*log10(ftMag)), grid minor,
 title('dB Magnitude') 
 ylabel('dB'), xlabel('kHz') 
 
