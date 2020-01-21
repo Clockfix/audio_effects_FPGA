@@ -13,7 +13,7 @@ module effect_controler #( parameter
     output  signed      [d_width-1: 0]  o_r_data,
 
     output                                      o_read_done,    // read done from effects module
-    output                                      o_read_ready,   // ready read from reefects module
+    output                                      o_read_ready,   // ready read from effects module
 
 
     input               [1:0]           sw,             // effect control swiches

@@ -1,4 +1,4 @@
-// This file is Test Bench for top_vga_mem module
+// This file is Test Bench for top module
 //  
 // 
 

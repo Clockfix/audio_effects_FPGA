@@ -12,10 +12,11 @@ module no_effect #( parameter
 );
 
 //-------------Internal Constants---------------------------
-localparam [3:0]        IDLE         = 'd0,
-                        OUTPUT       = 'd1;
+localparam [1:0]        IDLE         = 'd0,
+                        OUTPUT       = 'd1,
+                        CLEAR        = 'd3;
 
-reg [3:0] r_state=IDLE, r_next=IDLE;
+reg [1:0] r_state=IDLE, r_next=IDLE;
 
 reg   signed      [data_width-1: 0]     r_data = 'b0;
 reg                                     r_read_enable = 0;
@@ -28,12 +29,7 @@ assign  o_data          = r_data;
 
 //---------state register sequential always block-----------
 always @(posedge clk ) begin
-    if (reset == 1) begin
-        // clear state
-        r_state <= IDLE;
-        r_next <= IDLE;
-    end
-    else begin
+    if (~reset) begin
         r_state <= r_next;
     end 
 end
@@ -41,7 +37,12 @@ end
 //----next state & outputs, combinational always block------
 
 always @(posedge clk ) begin
-    
+    if (reset) begin
+        r_next <= IDLE;
+        r_read_enable <= 0;     // redy to read data
+        r_data_valid <= 0;
+    end   
+    else begin  
     case(r_state)
         IDLE    :   begin
                         if (i_data_ready == 1) begin
@@ -58,9 +59,9 @@ always @(posedge clk ) begin
                     end
         OUTPUT  :   begin
                         if (i_read_done == 1) begin
-                            r_next <= IDLE;
+                            r_next <= CLEAR;
                             r_data_valid <= 0;
-                            r_read_enable <= 1;
+                            r_read_enable <= 0;
                         end
                         else begin
                             r_next <= OUTPUT;
@@ -68,8 +69,16 @@ always @(posedge clk ) begin
                             r_read_enable <= 0;     // read disable
                         end
                     end
-        default: r_next <= IDLE;          // on error
+        CLEAR   :   begin
+                        r_next <= IDLE;
+                        r_data_valid  <= 0;
+                        r_read_enable <= 1;
+                    end
+        default:    begin
+                        r_next <= IDLE;          // on error
+                    end
     endcase 
+    end
 end
 
 

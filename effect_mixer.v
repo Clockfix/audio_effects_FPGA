@@ -36,6 +36,7 @@ reg     r_data_valid = 0;
 assign o_read_done = r_read_done;
 assign o_data_valid = r_data_valid;
 assign o_data = r_data_norm;
+assign o_read_ready = r_read_ready;
 
 
 //---------state register sequential always block-----------

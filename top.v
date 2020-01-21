@@ -38,8 +38,7 @@ wire master_clk;            // 11.29 MHz master clock
 
 wire clk_50MHz;             // 
 
-wire                w_reset, w_reset1, w_reset2, w_reset3, 
-                    w_reset4, w_reset5;
+wire                w_reset, w_reset1, w_reset2;
 wire                w_internal_reset;
 
 wire signed [d_width-1: 0] r_data_tx;
