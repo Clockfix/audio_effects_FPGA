@@ -1,3 +1,7 @@
+![GitHub](https://img.shields.io/github/license/clockfix/audio_effects_FPGA?style=plastic) 
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/clockfix/audio_effects_FPGA?style=plastic)
+![GitHub last commit](https://img.shields.io/github/last-commit/clockfix/audio_effects_FPGA?style=plastic)
+![GitHub contributors](https://img.shields.io/github/contributors/clockfix/audio_effects_FPGA?style=plastic)
 # Audio effects on FPGA
 
 Audio effect synthesizer on FPGA
