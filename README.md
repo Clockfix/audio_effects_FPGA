@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/clockfix/audio_effects_FPGA?style=plastic) 
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg?style=plastic)](https://lbesson.mit-license.org/)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/clockfix/audio_effects_FPGA?style=plastic)
 ![GitHub last commit](https://img.shields.io/github/last-commit/clockfix/audio_effects_FPGA?style=plastic)
 ![GitHub contributors](https://img.shields.io/github/contributors/clockfix/audio_effects_FPGA?style=plastic)
