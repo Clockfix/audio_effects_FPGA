@@ -1,5 +1,21 @@
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - JXADC PMOD connector output
+//
+// Detailed module description:
 // This module outputs signals to JXADC PMOD
 // where logic analyzer are conected.
+// Port is connected to logic analizer
+//
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////
+
 
 module JXADC_controler (
     input           ch0,

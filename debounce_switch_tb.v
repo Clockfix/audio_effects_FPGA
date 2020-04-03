@@ -1,6 +1,19 @@
-// This file is Test Bench for top_vga_mem module
-//  
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - Test Bench for debounce switch
+//
+// Detailed module description:
+// This file is Test Bench for debounce switch module
 // 
+//
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////
 
 // 100MHz clock on Basys3 -> 10ns period
 // 50% duty cycle 5ns HIGH and 5ns LOW

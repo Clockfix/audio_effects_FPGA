@@ -1,4 +1,20 @@
-module debounce_switch(
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - Debounce switch
+//
+// Detailed module description:
+// This is Debounce switch module.
+// It toggles output only when input is in 
+// HIGH or LOW state atleast for 10ms 
+//
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////module debounce_switch(
     input clk,
     input i_switch,
     output o_switch);

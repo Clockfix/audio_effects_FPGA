@@ -1,4 +1,11 @@
-// This I2S Playback design uses the common 44.1 kHz 
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - i2s sender
+//
+// Detailed module description:
+// This I2S design uses the common 44.1 kHz 
 // sampling frequency.  
 // From Figure 2 in Section 4.1.1 of the CS5343 
 // Datasheet, it is appropriate to use an SCLK/LRCK 
@@ -19,7 +26,14 @@
 //
 //  Module is created from sample provided by 
 //  Digilent
+// 
 //
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////
 
 
 module i2s_sender #( parameter

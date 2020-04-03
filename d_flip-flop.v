@@ -1,3 +1,18 @@
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - Flip-Flop
+//
+// Detailed module description:
+// Simple Flip-Flop
+//
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////
 module d_flipflop_sync_rst(
     input       D,
     output  reg Q,

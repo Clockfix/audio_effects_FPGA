@@ -1,11 +1,24 @@
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - clock divider
+//
+// Detailed module description:
 // This module devide FPGA input clock 
 // by DIVIDER. Result is 50% duty cicle 
 // pulses.
 //
+// Revision:
+// A - initial design
+// B - 
+// C - 
 //
+///////////////////////////////////////////////////////////////////
+
 module clock_divider #(
-    parameter DIVIDER =2,
-    parameter WIDTH =2
+    parameter WIDTH =2,
+    parameter DIVIDER =(2**WIDTH)
 ) (
     input clk_in,
     output clk_out);

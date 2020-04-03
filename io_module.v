@@ -20,15 +20,15 @@ module io_module #( parameter
 
     input reset,
     
-    // // inputs to logic analyzer
-    // input           ch0,
-    // input           ch1,
-    // input           ch2,
-    // input           ch3,
-    // input           ch4,
-    // input           ch5,
-    // input           ch6,
-    // input           ch7,
+    // inputs to logic analyzer
+    input           ch0,
+    input           ch1,
+    input           ch2,
+    input           ch3,
+    input           ch4,
+    input           ch5,
+    input           ch6,
+    input           ch7,
 
     output  [7: 0]  JXADC      // output for logic analizer
 
@@ -69,22 +69,15 @@ i2s_receicer  #(
 
 // connecting signals to JXADC PMOD to monitor them with signal analyzer
 JXADC_controler JXADC_controler(
-    .ch0(mclk),
-    .ch1(ad_sclk),
-    .ch2(ad_ws),
-    .ch3(sd_rx),        // serial data in
-    .ch4(mclk),
-    .ch5(da_sclk),
-    .ch6(da_ws),
-    .ch7(sd_tx),        // serial data out
+    .ch0(ch0),
+    .ch1(ch1),
+    .ch2(ch2),
+    .ch3(ch3),        // serial data in
+    .ch4(ch4),
+    .ch5(ch5),
+    .ch6(ch6),
+    .ch7(ch7),        // serial data out
     .JXADC(JXADC)       // output for logic analizer   
 );
-
-// // debounce reset button
-// debounce_switch debounce_switch_reset(
-//     .clk(mclk),
-//     .i_switch(btnC),
-//     .o_switch(reset_n)
-// );
 
 endmodule

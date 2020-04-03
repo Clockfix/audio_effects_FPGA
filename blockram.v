@@ -1,11 +1,22 @@
-// Code from:
-// Vivado Design Suite
-// User Guide
-// Synthesis
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - Dual-Port Block RAM
+//
+// Detailed module description:
+// Code from: Vivado Design Suite User Guide Synthesis
 // UG901 (v2018.3) December 19, 2018
 //
 // Dual-Port Block RAM with Two Write Ports
-// File: blobkram.v
+// File: blobkram.v 
+//
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////
 
 module rams_tdp_rf_rf #( parameter
     DEPTH =  16,

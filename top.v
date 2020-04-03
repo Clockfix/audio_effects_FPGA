@@ -1,8 +1,19 @@
-//      TOP module 
-//       
+///////////////////////////////////////////////////////////////// 
+// Author - Imants Pulkstenis
+// Date - 04.04.2020
+// Project name - Audio FFT on FPGA
+// Module name - Top module
 //
+// Detailed module description:
 //
+// 
 //
+// Revision:
+// A - initial design
+// B - 
+// C - 
+//
+///////////////////////////////////////////////////////////////////
 module top #( parameter
     sclk_ws_ratio = 64,         // number of sclk periods per word select period
     mclk_sclk_ratio = 4,        // number of mclk periods per sclk period
@@ -12,8 +23,12 @@ module top #( parameter
     input           clk,
     input           btnC,
     output  [15:0]  led, 
-    // input   [1:0]   sw,         // swiches on board to control effects
-    input   [15:0]   sw,         // swiches on board to control effects
+
+    output  [6:0]   seg,
+    output          dp,
+    output  [3:0]   an, 
+
+    input   [15:0]  sw,         // swiches on board to control effects
     output          da_mclk,
     output          ad_mclk,
     output          da_sclk,
@@ -26,7 +41,7 @@ module top #( parameter
     );
 
 //assign output from effect controler to leds
-assign led = l_data_tx[d_width-1: d_width-16];
+assign led = sw;
 
 assign da_mclk = master_clk;    //output master clock to ADC
 assign ad_mclk = master_clk;    //output master clock to DAC
@@ -38,11 +53,11 @@ wire master_clk;            // 11.29 MHz master clock
 
 wire clk_50MHz;             // 
 
-wire                w_reset, w_reset1, w_reset2;
+wire                w_reset; 
 wire                w_internal_reset;
 
-wire signed [d_width-1: 0] r_data_tx;
-wire signed [d_width-1: 0] l_data_tx;
+// wire signed [d_width-1: 0] r_data_tx;
+// wire signed [d_width-1: 0] l_data_tx;
 wire signed [d_width-1: 0] r_data_rx;
 wire signed [d_width-1: 0] l_data_rx;
 
@@ -76,25 +91,12 @@ clk_wiz_0 m_clk(
     .reset(btnC)
 );
 
-// Flip-flops for reset
+// Flip-flop for reset
 d_flipflop_sync_rst D_flipflop1 (
     .D(1'b0),
-    .Q(w_reset1),
-    .clk(master_clk),
-    .reset(~w_internal_reset));
-
-d_flipflop_sync_rst D_flipflop2 (
-    .D(w_reset1),
-    .Q(w_reset2),
-    .clk(master_clk),
-    .reset(~w_internal_reset));
-
-d_flipflop_sync_rst D_flipflop3 (
-    .D(w_reset2),
     .Q(w_reset),
     .clk(master_clk),
     .reset(~w_internal_reset));
-
 
 
 io_module  #(
@@ -110,8 +112,8 @@ io_module  #(
     .ad_ws(ad_lrck),                    //word select (or left-right clock)
     .sd_tx(da_sdin),                    //serial data transmit
     .sd_rx(ad_sdout),                   //serial data receive
-    .l_data_tx(l_data_tx),              //left channel data to transmit
-    .r_data_tx(r_data_tx),              //right channel data to transmit
+    .l_data_tx(l_data_rx),              //left channel data to transmit
+    .r_data_tx(r_data_rx),              //right channel data to transmit
 
     .reset(w_reset),           //reset 
 
@@ -119,65 +121,31 @@ io_module  #(
     .r_data_rx(r_data_rx),              //right channel data received
 
 
-    // // inputs to logic analyzer
-    // .ch0(),
-    // .ch1(),
-    // .ch2(),
-    // .ch3(),
-    // .ch4(),
-    // .ch5(),
-    // .ch6(),
-    // .ch7(),
+    // inputs to logic analyzer
+    .ch0(clk10k),
+    .ch1(da_sclk),
+    .ch2(da_lrck),
+    .ch3(da_sdin),
+    .ch4(master_clk),
+    .ch5(ad_sclk),
+    .ch6(ad_lrck),
+    .ch7(ad_sdout),
 
     .JXADC(JXADC)                       // output for logic analizer
 );
 
+segment4x7 segment4x7(
+    .clk(clk10k),       // 10kHz clock
+    .in(sw),            // input
+    .seg(seg),          // individual segments of number
+    .an(an),            // anode to select character
+    .dp(dp)             // dot on 7segment display
+    );
 
-//Effect controler controls effects and perfoms multiplexing and data marging
-effect_controler #(
-    .d_width(d_width),                  // data width
-    .memory_d_width(memory_d_width)
-) effect_controler (
-    .reset(w_reset),                    // asynchronous active high reset
-    .mclk(master_clk),
-    .sw(sw[1:0]),
-    .clk(clk_50MHz),
-    .i_l_data(l_data_rx),               // left channel data received         
-    .i_r_data(r_data_rx),               // right channel data received
-    // .i_l_data({sw[15:2], 10'b0 }),               // left channel data received         
-    // .i_r_data({sw[15:2], 10'b0 }),               // right channel data received
-    .o_l_data(l_data_tx),               // left channel data to transmit
-    .o_r_data(r_data_tx),               // right channel data to transmit
-    .o_read_done(w_read_done_eff),      // read done from effects controler
-    .o_read_ready(w_read_ready_eff),    // ready read from reefects module
-
-    .o_data_to_eff(w_data_to_eff),      // Data output to effects module
-    .o_data_valid(w_dv_to_eff),         // data valid to read (FIFO not empty). data valid signal to effect module
-    
-    .i_read_enable(w_rd_en_from_eff),   // read enable from Effect module
-    .i_dv_from_eff(w_dv_from_eff),      // data valid write (FIFO not full). data valid signal from effect module
-    .i_data_from_eff_sw0(w_data_from_eff_sw0),   // Data input from effects module
-    .i_data_from_eff_sw1(w_data_from_eff_sw1)    // Data input from effects module
+clock_divider #(.WIDTH(9)) 
+clock_divider7seg (
+    .clk_in(clk_50MHz),
+    .clk_out(clk10k)
 );
-
-
-//Effect module contains all individual effects  
-effect_module #(
-    .d_width(memory_d_width)                    // data width
-) effect_module (
-    .clk(clk_50MHz),
-    .reset(w_reset),
-    .sw(sw[1:0]),                               // effect control swiches
-    .i_treshhold(sw[15:2]),
-    .i_data_ready(w_dv_to_eff),                 // data ready to read
-    .i_read_done(w_read_done_eff),              // read done from effects controler
-    .i_data(w_data_to_eff),                     // data input form effect controler
-    .o_read_enable(w_rd_en_from_eff),           // enable data reading
-    .o_data_valid(w_dv_from_eff),
-    .o_data_sw0(w_data_from_eff_sw0),
-    .o_data_sw1(w_data_from_eff_sw1)
-
-);
-
 
 endmodule
