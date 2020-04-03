@@ -23,10 +23,16 @@ module top #( parameter
     input           clk,
     input           btnC,
     output  [15:0]  led, 
-
+    // 7 segment display
     output  [6:0]   seg,
     output          dp,
     output  [3:0]   an, 
+    //VGA  inputs outputs
+    output [3:0]    vgaRed,
+    output [3:0]    vgaBlue,
+    output [3:0]    vgaGreen,
+    output          Hsync,
+    output          Vsync,
 
     input   [15:0]  sw,         // swiches on board to control effects
     output          da_mclk,
@@ -50,8 +56,8 @@ assign ad_mclk = master_clk;    //output master clock to DAC
 
 //------internal wires and registers--------
 wire master_clk;            // 11.29 MHz master clock
-
-wire clk_50MHz;             // 
+wire clk_50MHz;             // 50 MHz clock 
+wire clk_25MHz;             // 25 MHz clock 
 
 wire                w_reset; 
 wire                w_internal_reset;
@@ -86,7 +92,8 @@ wire [d_width-1: 0] w_data_from_eff_sw1;
 clk_wiz_0 m_clk(
     .clk_in1(clk),
     .clk_out1(master_clk),  // 11.29 MHz master clock for I2S
-    .clk_out2(clk_50MHz),   // 25MHz main clock
+    .clk_out2(clk_50MHz),   // 50MHz main clock
+    .clk_out3(clk_25MHz),   // 25MHz main clock
     .locked(w_internal_reset),
     .reset(btnC)
 );
@@ -122,14 +129,14 @@ io_module  #(
 
 
     // inputs to logic analyzer
-    .ch0(clk10k),
-    .ch1(da_sclk),
-    .ch2(da_lrck),
-    .ch3(da_sdin),
-    .ch4(master_clk),
-    .ch5(ad_sclk),
-    .ch6(ad_lrck),
-    .ch7(ad_sdout),
+    .ch0(Hsync),
+    .ch1(Vsync),
+    .ch2(),
+    .ch3(),
+    .ch4(),
+    .ch5(),
+    .ch6(),
+    .ch7(),
 
     .JXADC(JXADC)                       // output for logic analizer
 );
@@ -142,10 +149,36 @@ segment4x7 segment4x7(
     .dp(dp)             // dot on 7segment display
     );
 
-clock_divider #(.WIDTH(9)) 
+clock_divider #(.WIDTH(11)) 
 clock_divider7seg (
     .clk_in(clk_50MHz),
     .clk_out(clk10k)
 );
+
+vga_module #(  
+        // .ADDR_WIDTH(ADDR_WIDTH),
+        // .DATA_WIDTH(DATA_WIDTH),
+        // .DEPTH(DEPTH),
+        // .HSYNC_CLKS(HSYNC_CLKS),
+        // .HSYNC_DISPLAY(HSYNC_DISPLAY),
+        // .HSYNC_PULSE(HSYNC_PULSE),
+        // .HSYNC_FRONT_PORCH(HSYNC_FRONT_PORCH),
+        // .HSYNC_BACK_PORCH(HSYNC_BACK_PORCH),
+        // .VSYNC_LINES(VSYNC_LINES) ,
+        // .VSYNC_DISPLAY(VSYNC_DISPLAY) ,
+        // .VSYNC_PULSE(VSYNC_PULSE) ,
+        // .VSYNC_FRONT_PORCH(VSYNC_FRONT_PORCH) ,
+        // .VSYNC_BACK_PORCH(VSYNC_BACK_PORCH) 
+) vga_module1 (
+    .clk(clk_25MHz),
+    .o_vgaRed(vgaRed),
+    .o_vgaBlue(vgaBlue),
+    .o_vgaGreen(vgaGreen),
+    .o_Hsync(Hsync),
+    .o_Vsync(Vsync),
+    .o_display(),
+    .o_addr_rd(),
+    .i_data_rd()
+   );
 
 endmodule
