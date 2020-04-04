@@ -5,75 +5,51 @@
 clear;                      % clears all previus values from memory 
 clc;                        % clear command window
 fs =  44100;                % samplinf freq.
-fftLength=256;              % windowlength 
+fftLength=2^9;              % windowlength 
 stage_num = log2(fftLength);
+Wn_word = 12;                % signed fixed point lenght for Wn (fraction is word-2)
+samp_word = 8;               % word lenght of samped signal (fraction is word-2)
+w_bits = 10;                 % signed fixed point integer bit lenght
+f_bits = 10;                 % signed fixed point integer bit lenght for calculations
 
-while 1                     % Checking for correct "fftLength"-Wondow length value
-if ~mod(stage_num,1)==0
-    error('"fftLength"-Wondow length value must be a numer: 2^x= : 2, 4, 8, 16, 32,...');
-    break
-else
-                            % continue working if value is correct
-% signal frequencies
-max = 2048 - 1 ;
-
-f1 = 430;
-a1 = 0;
-
-f2 = 4300;
-a2 = 0;
-
-f3 = 8000;
-a3 = max/2;
-
-% calculating signals 
-comp1 = a1 * sin(2*pi*f1*[0:1/fs:1]);
-comp2 = a2 * sin(2*pi*f2*[0:1/fs:1]);
-comp3 = a3 * sin(2*pi*f3*[0:1/fs:1]);
-Length = length(comp3);
-
-data = comp1 + comp2 + comp3;      % creates vector from 3 sin functions
-%data = comp3;
-
-% Plot shifting to center
-bin_vals = [0 : fftLength-1];
-N_2 = ceil(fftLength/2);
-fax_kHz = (bin_vals-N_2)*fs/fftLength/1000;
-
-freq3 = ceil(-(fftLength)/2:1:(fftLength)/2).*(fs/fftLength)/1000;
-
-figure(1)               % plots separete sin functions
-hold off,
-%plot ( comp1, '-');
-hold on;
-%plot ( comp2, '-');
-plot (comp3, '-')
-xlim([1 50]), grid minor,;
-title('Separete SIN functions') 
-ylabel('magnitude'), xlabel('time') 
-hold off;
+                           
+% reading input audio file
+% audio samples are from matlab examples
+% load handel.mat
+% filename = 'handel.wav';
+% load gong.mat;
+filename = 'gong.wav';
+% audiowrite(filename,y,Fs);
+[y,fs] = audioread(filename);
+data = sfi(y, samp_word, samp_word-2); 
+m = 7;                          % alow select section of signal for FFT
+data_cut = data(fftLength*m+1:fftLength*m+fftLength);
+%sound(data.double,fs);
 
 figure(2)               % plots signal for fft
-plot (data), grid minor,;
-xlim([1 50])
+plot (data_cut), grid minor,
+% xlim([fftLength*m+1 fftLength*m+fftLength])
 title('Signal for FFT analysis FFT') 
 ylabel('magnitude'), xlabel('time') 
 
+
+bin_vals = [0 : fftLength-1];
+
 figure(3)               % plots resultinf fft from Matlab functions
-ft = fft(data,fftLength); 
+ft = fft(data_cut.double,fftLength); 
 ft1 = fftshift(ft);
 ftMag = abs(ft1); 
-plot (fax_kHz,ftMag), grid minor,
+plot (bin_vals,ftMag), grid minor,
 title('Linear Magnitude FFT') 
-ylabel('magnitude'), xlabel('kHz') 
+ylabel('magnitude'), xlabel(' ') 
 
-figure(4)               % plots resultinf fft(in dB) from Matlab functions
-ft = fft(data,fftLength); 
-ft1 = fftshift(ft);
-ftMag = abs(ft1(1:fftLength)); 
-plot (fax_kHz,20*log10(ftMag)), grid minor,
-title('dB Magnitude') 
-ylabel('dB'), xlabel('kHz') 
+% figure(4)               % plots resultinf fft(in dB) from Matlab functions
+% ft = fft(data.double,fftLength); 
+% ft1 = fftshift(ft);
+% ftMag = abs(ft1(1:fftLength)); 
+% plot (bin_vals,20*log10(ftMag)), grid minor,
+% title('dB Magnitude') 
+% ylabel('dB'), xlabel(' ') 
 
 %% Data preparation for FFT
 
@@ -97,67 +73,64 @@ imag_n_sfi = zeros(bits+1,fftLength);
 
 %% Starting stages
 
-for st = 0 : stage_num;
+for st = 0 : stage_num
     if st == 0
-       for tmp=1:fftLength;
-            stage(st+1,tmp)  =  data(rev_bit_dec(tmp)+1);
-            real_n(st+1,tmp)  =  data(rev_bit_dec(tmp)+1);
+       for tmp=1:fftLength
+            stage(st+1,tmp)  =  data_cut(rev_bit_dec(tmp)+1);
+            real_n(st+1,tmp)  =  data_cut(rev_bit_dec(tmp)+1);
+            real_n_sfi(st+1,tmp) = sfi(real_n(st+1,tmp),f_bits  +  w_bits ,f_bits);
        end
     else st > 0;
-        for n = 1 : fftLength/2;
+        for n = 1 : fftLength/2
                 Wn(n)  = exp(-j * (n-1) * 2 * pi/ 2^(st) );
-                Wr(n) = real(Wn(n));
-                Wi(n) = imag(Wn(n));
+%                 Wr(n) = real(Wn(n));
+%                 Wi(n) = imag(Wn(n));
+                Wr(n) = sfi(real(Wn(n)),Wn_word,Wn_word-2);
+                Wi(n) = sfi(imag(Wn(n)),Wn_word,Wn_word-2);
         end
-        for i = 1 : 2^st : fftLength;
-                for k = 0 : 2^(st-1)-1;
+        for i = 1 : 2^st : fftLength
+                for k = 0 : 2^(st-1)-1
                     % Even
                         stage(st+1,i+k) = stage(st,i+k) + Wn(k+1)*stage(st,i+k+2^(st-1));
-                        real_n(st+1,i+k) = real_n(st,i+k) + Wr(k+1)*real_n(st,i+k+2^(st-1)) - Wi(k+1)*imag_n(st,i+k+2^(st-1));
-                        imag_n(st+1,i+k) = imag_n(st,i+k) + Wi(k+1)*real_n(st,i+k+2^(st-1)) + + Wr(k+1)*imag_n(st,i+k+2^(st-1));
+                        real_n(st+1,i+k) = real_n_sfi(st,i+k) + Wr(k+1)*real_n_sfi(st,i+k+2^(st-1)) - Wi(k+1)*imag_n_sfi(st,i+k+2^(st-1));
+                        imag_n(st+1,i+k) = imag_n_sfi(st,i+k) + Wi(k+1)*real_n_sfi(st,i+k+2^(st-1)) + Wr(k+1)*imag_n_sfi(st,i+k+2^(st-1));
+                        real_n_sfi(st+1,i+k) = sfi(real_n(st+1,i+k),f_bits  + w_bits,f_bits);
+                        imag_n_sfi(st+1,i+k) = sfi(imag_n(st+1,i+k),f_bits  + w_bits,f_bits);
                     % Odd
                         stage(st+1,i+k+2^(st-1)) = stage(st,i+k) - Wn(k+1)*stage(st,i+k+2^(st-1));
-                        real_n(st+1,i+k+2^(st-1)) = real_n(st,i+k) - Wr(k+1)*real_n(st,i+k+2^(st-1)) +  Wi(k+1)*imag_n(st,i+k+2^(st-1));
-                        imag_n(st+1,i+k+2^(st-1)) = imag_n(st,i+k) - Wi(k+1)*real_n(st,i+k+2^(st-1)) - Wr(k+1)*imag_n(st,i+k+2^(st-1));
+                        real_n(st+1,i+k+2^(st-1)) = real_n_sfi(st,i+k) - Wr(k+1)*real_n_sfi(st,i+k+2^(st-1)) +  Wi(k+1)*imag_n_sfi(st,i+k+2^(st-1));
+                        imag_n(st+1,i+k+2^(st-1)) = imag_n_sfi(st,i+k) - Wi(k+1)*real_n_sfi(st,i+k+2^(st-1)) - Wr(k+1)*imag_n_sfi(st,i+k+2^(st-1));
+                        real_n_sfi(st+1,i+k+2^(st-1)) = sfi(real_n(st+1,i+k+2^(st-1)),f_bits +  w_bits,f_bits);
+                        imag_n_sfi(st+1,i+k+2^(st-1)) = sfi(imag_n(st+1,i+k+2^(st-1)),f_bits +  w_bits,f_bits);
                 end
         end
     end
 end
 
-%% Constructing signed fixed-point numeric objects
-
- for n = 1 : fftLength/2;
-     Wr_sfi(n) = sfi(real(Wn(n)),16);
-     Wi_sfi(n) = sfi(imag(Wn(n)),16);
- end
-
-  for n = 1 : fftLength;
-      for k = 1 : st + 1
-        real_n_sfi(k,n) = sfi(real_n(k,n),24);
-        imag_n_sfi(k,n) = sfi(imag_n(k,n),24);
-      end
-  end
- 
 %% Plotting out
 
 % for slowly result plotting uncomment pause
 
 figure(5)
-for i = 1 : bits + 1;
+%for i = 1 : bits + 1;
+for i = bits+1 : bits + 1
     %plot( fax_kHz, abs( fftshift( real_n(i, :) + j.*imag_n(i,:) ) ) ),
-    plot( fax_kHz, abs( fftshift( stage(i,:) ) ) ),
-    grid minor, title('Linear Magnitude FFT'), ylabel('magnitude'), xlabel('kHz');
+    plot( bin_vals, abs( fftshift( stage(i,:) ) ) ),
+    grid minor, title('Linear Magnitude FFT'), ylabel('magnitude'), xlabel(' ');
     %pause(1);
 end
 
 figure(6)
-for i = 1 : bits + 1;
-    plot( fax_kHz, abs( fftshift( real_n(i, :) + j.*imag_n(i,:) ) ) ),
-    grid minor, title('Linear Magnitude FFT, ploted from Real + Imag'), ylabel('magnitude'), xlabel('kHz');
+%for i = 1 : bits + 1;
+for i = bits+1 : bits + 1
+    plot( bin_vals, abs( fftshift( real_n_sfi(i, :) + j.*imag_n_sfi(i,:) ) ) ),
+    grid minor, title('Linear Magnitude FFT, ploted from Real + Imag'), ylabel('magnitude'), xlabel(' ');
     %plot( fax_kHz, abs( fftshift( stage(i,:) ) ) ), grid minor,;
     %pause(1);
 end
 
-break
-end
-end
+figure(7)
+dif = abs( fftshift( stage(bits+1,:) ) ) - abs( fftshift( real_n_sfi(bits+1, :) + j.*imag_n_sfi(bits+1,:) ) )  ;
+plot( bin_vals, dif )
+grid minor, title('Difference in plots'), ylabel('diff magnitude'), xlabel(' ');
+

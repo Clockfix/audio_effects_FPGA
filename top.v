@@ -111,7 +111,7 @@ io_module  #(
     .sclk_ws_ratio(sclk_ws_ratio),          //number of sclk periods per word select period
     .d_width(d_width)                       //data width
 ) io_module (
-    //.reset_n(reset_n),                  //asynchronous active high reset
+    .reset(reset_n),                    //asynchronous active high reset
     .mclk(master_clk),                  //master clock
     .da_sclk(da_sclk),                  //serial clock (or bit clock)
     .da_ws(da_lrck),                    //word select (or left-right clock)
